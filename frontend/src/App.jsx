@@ -18,7 +18,7 @@ const App = () => {
             duration: 5000,
             style: {
               background: '#fff',
-              color: '#22864D',
+              color: '#103d24',
             },
             success: {
               duration: 3000,
@@ -46,8 +46,8 @@ const App = () => {
               <Layout/>
             </ProtectedRoute>
           }>
-            <Route path='/home' element={<Dashboard/>}/> 
-            <Route path='/plan' element={<div>Plan Page (Coming Soon)</div>}/> 
+            <Route path='/home' element={<div>Home Page (Coming Soon)</div>}/> 
+            <Route path='/plan' element={<Dashboard/>}/> 
             <Route path='/report' element={<div>Report Page (Coming Soon)</div>}/> 
           </Route>
         </Routes>

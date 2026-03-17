@@ -21,7 +21,7 @@ const Login = () => {
     } else if (placeholder === 'User Name') {
       setFormData(prev => ({ ...prev, user_name: value }));
     } else if (placeholder === '6-digit PIN') {
-      const numericValue = value.replace(/[^0-9]/g, '');
+      const numericValue = value.replace(/[^a-zA-Z0-9]/g, '');
       if (numericValue.length <= 6) {
         setFormData(prev => ({ ...prev, pin: numericValue }));
       }
@@ -103,7 +103,6 @@ const Login = () => {
             <div>
               <input 
                 type="password" 
-                inputMode="numeric" 
                 maxLength="6" 
                 placeholder="6-digit PIN" 
                 value={formData.pin}
@@ -160,6 +159,12 @@ const Login = () => {
             </h2>
            <p className="text-white text-md mt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. <br/>Dolor sit amet, consectetur adipiscing. elit </p>
           </div>
+
+          <img
+            src="/image.png"
+            alt="Illustration"
+            className="ml-22 mt-20 w-full rotate-[-25deg]"
+          />
         </div>
       </div>
     </div>

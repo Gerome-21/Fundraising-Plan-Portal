@@ -16,14 +16,12 @@ const Register = () => {
   const handleChange = (e) => {
     const { placeholder, value } = e.target
     
-    // Map placeholder to field names
     if (placeholder === 'Organization Name') {
       setFormData(prev => ({ ...prev, organization_name: value }))
     } else if (placeholder === 'User Name') {
       setFormData(prev => ({ ...prev, user_name: value }))
     } else if (placeholder === '6-digit PIN') {
-      // Only allow numbers and limit to 6 digits
-      const numericValue = value.replace(/[^0-9]/g, '')
+      const numericValue = value.replace(/[^a-zA-Z0-9]/g, '')
       if (numericValue.length <= 6) {
         setFormData(prev => ({ ...prev, pin: numericValue }))
       }
@@ -128,7 +126,6 @@ const Register = () => {
             <div>
               <input 
                 type="password" 
-                inputMode="numeric" 
                 maxLength="6" 
                 placeholder="6-digit PIN" 
                 value={formData.pin}

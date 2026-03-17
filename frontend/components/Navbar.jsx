@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiHeart, FiMenu, FiStar, FiX } from 'react-icons/fi';
+import { FiHeart, FiLogOut, FiMenu, FiStar, FiUser, FiX } from 'react-icons/fi';
 import { useUser } from '../context/UserContext';
 
 const Navbar = () => {
@@ -14,16 +14,16 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-gray-100 py-4 px-4 sm:px-8 lg:px-12 flex items-center justify-between z-50">
+    <nav className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm py-4 px-4 sm:px-8 lg:px-12 flex items-center justify-between z-50">
       {/* Logo Section */}
       <Link to="/home" className="flex items-center space-x-3 group">
         <div className="relative">
           <img 
             src="/akubo.jpg" 
             alt="PharmaSync Logo"
-            className="h-12 rounded-full w-auto transform group-hover:scale-110 transition-transform duration-300"
+            className="h-12 rounded-full w-auto transform group-hover:scale-110 transition-all duration-300"
           />
-          <div className="absolute -inset-2 bg-blue-100 rounded-full opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
+          <div className="absolute -inset-2 bg-blue-100 rounded-full opacity-0 group-hover:opacity-50 transition-all duration-300"></div>
         </div>
         <div>
           <span className="text-2xl font-bold bg-gradient-to-r from-[#22864D] to-green-500 bg-clip-text text-transparent">
@@ -36,21 +36,21 @@ const Navbar = () => {
       <div className="hidden lg:flex items-center space-x-8">
         <Link 
           to="/home"
-          className="text-[#001033] hover:text-green-600 transition-colors font-medium relative group"
+          className="text-md text-[#001033] hover:text-green-600 transition-colors font-medium relative group"
         >
           Home
           <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 group-hover:w-full transition-all duration-300"></span>
         </Link>
         <Link 
           to="/plan"
-          className="text-[#001033] hover:text-green-600 transition-colors font-medium relative group"
+          className="text-md text-[#001033] hover:text-green-600 transition-colors font-medium relative group"
         >
           Plan
           <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 group-hover:w-full transition-all duration-300"></span>
         </Link>
         <Link 
           to="/report"
-          className="text-[#001033] hover:text-green-600 transition-colors font-medium relative group"
+          className="text-md text-[#001033] hover:text-green-600 transition-all font-medium relative group"
         >
           Report
           <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 group-hover:w-full transition-all duration-300"></span>
@@ -58,15 +58,21 @@ const Navbar = () => {
         
         <div className="flex items-center gap-4 pl-4 border-l border-gray-200">
           {user && (
-            <span className="text-sm text-gray-600">
-              {user.organization_name}
-            </span>
+            <div className='flex flex-col'>
+              <p className="text-sm text-gray-600">
+                {user.organization_name}
+              </p>
+              <span className="flex gap-1 text-xs text-green-900">
+                <p><FiUser/></p>
+                <p>{user.user_name}</p>
+              </span>
+            </div>
           )}
           <button
             onClick={handleLogout}
-            className="bg-gradient-to-r from-[#22864D] to-green-500 hover:from-red-700 hover:to-[#650303] text-white px-6 py-2 rounded-xl hover:shadow-xl shadow-blue-500/30 transition-all font-medium transform hover:-translate-y-0.5"
+            className="bg-gradient-to-r from-[#22864D] to-green-500 hover:from-red-700 hover:to-[#650303] text-white px-3 py-2 rounded-xl hover:shadow-xl transition-all font-medium"
           >
-            Logout
+            <FiLogOut className='w-4 h-4'/>
           </button>
         </div>
       </div>
@@ -106,7 +112,7 @@ const Navbar = () => {
             
             {user && (
               <div className="text-sm text-gray-600 py-2 border-t border-gray-100">
-                Logged in as: {user.organization_name}
+                Logged in as: {user.user_name}
               </div>
             )}
             
