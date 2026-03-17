@@ -5,7 +5,14 @@ const years = ["2026", "2027", "2028", "2029", "2030"];
 
 const Tool2ProgramNeeds = () => {
   const [requirements, setRequirements] = useState([
-    { name: "", budgets: {}, comments: "" }
+    { name: "Program 1", budgets: {}, comments: "" }
+  ]);
+
+  const [committedFunds, setCommittedFunds] = useState([
+    { name: "Grants?", budgets: {}, comments: "" },
+    { name: "Interest Income?", budgets: {}, comments: "" },
+    { name: "Consultancy Contracts?", budgets: {}, comments: "" },
+    { name: "Conference/Membership Fees/Sponsorship?", budgets: {}, comments: "" }
   ]);
 
   const addRequirement = () => {
@@ -27,22 +34,57 @@ const Tool2ProgramNeeds = () => {
     setRequirements(updated);
   };
 
-  const handleBudgetChange = (index, year, value) => {
+  const handleRequirementBudgetChange = (index, year, value) => {
     const updated = [...requirements];
-    updated[index].budgets[year] = value;
+    updated[index].budgets[year] = value ? parseFloat(value) || 0 : "";
     setRequirements(updated);
+  };
+
+  const handleCommittedChange = (index, year, value) => {
+    const updated = [...committedFunds];
+    updated[index].budgets[year] = value ? parseFloat(value) || 0 : "";
+    setCommittedFunds(updated);
+  };
+
+  const handleCommittedCommentChange = (index, value) => {
+    const updated = [...committedFunds];
+    updated[index].comments = value;
+    setCommittedFunds(updated);
+  };
+
+  // Calculate totals for each year
+  const calculateYearTotal = (items, year) => {
+    return items.reduce((sum, item) => {
+      const value = item.budgets[year];
+      return sum + (typeof value === 'number' && !isNaN(value) ? value : 0);
+    }, 0);
+  };
+
+  const requirementTotals = years.map(year => calculateYearTotal(requirements, year));
+  const committedTotals = years.map(year => calculateYearTotal(committedFunds, year));
+  const gaps = years.map((_, index) => committedTotals[index] - requirementTotals[index]);
+
+  // Format number with commas
+  const formatNumber = (num) => {
+    if (num === 0) return "0";
+    return num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   return (
     <>
-      <h2 className="text-xl font-bold text-[#001033] mb-6">
+      <h2 className="text-2xl font-bold text-[#001033] mb-4">
         Tool 2: Program Needs List
       </h2>
+      <section className="mb-2 ">
+        <h3 className="font-medium">Objectives</h3>
+        <ul className="text-sm list-disc pl-6 mb-6 space-y-1">
+          <li>To determine the funds needed by the program</li>
+          <li>To identify the difference between the program requirements and the committed funds</li>
+        </ul>
+      </section> 
 
       <div className="overflow-x-auto bg-white shadow-md rounded-lg border">
         <table className="min-w-full text-xs">
-
-          {/* HEADER */}
           <thead>
             <tr className="bg-black text-white">
               <th className="text-sm px-4 py-3 text-left w-[250px]">
@@ -99,16 +141,16 @@ const Tool2ProgramNeeds = () => {
                   <td key={year} className="p-2">
                     <input
                       type="number"
-                      placeholder="0"
+                      placeholder="0.00"
                       value={req.budgets[year] || ""}
                       onChange={(e) =>
-                        handleBudgetChange(
+                        handleRequirementBudgetChange(
                           index,
                           year,
                           e.target.value
                         )
                       }
-                      className="w-full border rounded px-2 py-1 text-xs text-center"
+                      className="w-full border rounded px-2 py-1 text-xs text-right"
                     />
                   </td>
                 ))}
@@ -155,11 +197,13 @@ const Tool2ProgramNeeds = () => {
               </td>
             </tr>
 
-            {/* TOTAL */}
+            {/* TOTAL A */}
             <tr className="bg-gray-100 font-semibold border-t">
-              <td className="px-4 py-3">TOTAL</td>
-              {years.map((year) => (
-                <td key={year}></td>
+              <td className="px-4 py-3">TOTAL A</td>
+              {requirementTotals.map((total, i) => (
+                <td key={i} className="px-4 py-3 text-right">
+                  {formatNumber(total)}
+                </td>
               ))}
               <td></td>
               <td></td>
@@ -168,31 +212,32 @@ const Tool2ProgramNeeds = () => {
             {/* SECTION B */}
             <tr className="bg-black text-white">
               <td colSpan={8} className="px-4 py-3 font-semibold">
-                B. COMMITTED FUND
+                B. COMMITTED FUNDS
               </td>
             </tr>
 
-            {[
-              "Grants",
-              "Interest Income",
-              "Consultancy Contracts",
-              "Conference/Membership Fees/Sponsorship"
-            ].map((item, i) => (
+            {committedFunds.map((item, i) => (
               <tr key={i} className="border-t hover:bg-gray-50">
-                <td className="px-4 py-2">{item}</td>
+                <td className="px-4 py-2">{item.name}</td>
 
                 {years.map((year) => (
                   <td key={year} className="p-2">
                     <input
                       type="number"
-                      className="w-full border rounded px-2 py-1 text-sm text-center"
+                      placeholder="0.00"
+                      value={item.budgets[year] || ""}
+                      onChange={(e) => handleCommittedChange(i, year, e.target.value)}
+                      className="w-full border rounded px-2 py-1 text-sm text-right"
                     />
                   </td>
                 ))}
 
-                <td>
+                <td className="p-2">
                   <input
                     type="text"
+                    placeholder="Comments"
+                    value={item.comments || ""}
+                    onChange={(e) => handleCommittedCommentChange(i, e.target.value)}
                     className="w-full border rounded px-2 py-1 text-sm"
                   />
                 </td>
@@ -201,10 +246,13 @@ const Tool2ProgramNeeds = () => {
               </tr>
             ))}
 
+            {/* TOTAL B */}
             <tr className="bg-gray-100 font-semibold border-t">
-              <td className="px-4 py-3">TOTAL</td>
-              {years.map((year) => (
-                <td key={year}></td>
+              <td className="px-4 py-3">TOTAL B</td>
+              {committedTotals.map((total, i) => (
+                <td key={i} className="px-4 py-3 text-right">
+                  {formatNumber(total)}
+                </td>
               ))}
               <td></td>
               <td></td>
@@ -213,10 +261,21 @@ const Tool2ProgramNeeds = () => {
             {/* SECTION C */}
             <tr className="bg-black text-white">
               <td colSpan={8} className="px-4 py-3 font-semibold">
-                C. TOTAL GAP (Difference between A & B)
+                C. TOTAL GAP (B - A)
               </td>
             </tr>
 
+            {/* GAP ROW */}
+            <tr className="bg-green-50 font-semibold border-t">
+              <td className="px-4 py-3">GAP</td>
+              {gaps.map((gap, i) => (
+                <td key={i} className={`px-4 py-3 text-right ${gap < 0 ? 'text-red-600' : 'text-black'}`}>
+                  {formatNumber(gap)}
+                </td>
+              ))}
+              <td></td>
+              <td></td>
+            </tr>
           </tbody>
         </table>
       </div>

@@ -40,18 +40,18 @@ const PlanningContent = ({ step, setStep }) => {
           {step > 1 && (
             <button
               onClick={() => setStep(step - 1)}
-              className="flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-600"
+              className="flex items-center gap-1 px-4 py-2 bg-green-700 text-white text-sm rounded-lg hover:bg-green-600"
             >
-              <FiArrowLeft />Prev
+              <FiArrowLeft className="w-3 h-3"/>Prev
             </button>
           )}
 
           {step < 7 && (
             <button
               onClick={() => setStep(step + 1)}
-              className="ml-auto flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-600"
+              className="ml-auto flex items-center gap-1 px-3 py-2 bg-green-700 text-white text-sm rounded-lg hover:bg-green-600"
             >
-               Next<FiArrowRight />
+               Next <FiArrowRight className="w-3 h-3"/>
             </button>
           )}
 
