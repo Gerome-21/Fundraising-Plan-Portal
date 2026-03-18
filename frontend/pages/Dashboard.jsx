@@ -17,7 +17,7 @@ const Dashboard = () => {
   ];
 
   // Define which tools should trigger compact view
-  const compactViewTools = [2, 3, 6];
+  const compactViewTools = [2, 4, 6];
   const isCompactView = compactViewTools.includes(step);
 
   return (

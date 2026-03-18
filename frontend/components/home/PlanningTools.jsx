@@ -6,7 +6,7 @@ const PlanningTools = ({ steps, step, setStep }) => {
   const toolsPerPage = 4;
   const [page, setPage] = useState(0);
   
-  const compactViewTools = [2, 3, 6]; // Tool 2, Tool 3, and Tool 6
+  const compactViewTools = [2, 4, 6]; // Tool 2, Tool 3, and Tool 6
   
   const isCompactView = compactViewTools.includes(step);
   

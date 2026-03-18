@@ -137,7 +137,7 @@ const Login = () => {
             </button>
           </form>
 
-          <p className="text-xs text-gray-600 text-center mt-4">
+          {/* <p className="text-xs text-gray-600 text-center mt-4">
               Don't have an account?{' '}
               <a 
                 href="/register" 
@@ -145,7 +145,7 @@ const Login = () => {
               >
                 Register
               </a>
-            </p>
+            </p> */}
         </div>
 
         {/* RIGHT SECTION */}
