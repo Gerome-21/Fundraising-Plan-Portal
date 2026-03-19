@@ -1,31 +1,76 @@
-import React, { useState } from "react";
-import { FiPlus, FiTrash2 } from "react-icons/fi";
+import React, { useState, useEffect } from "react";
+import { FiPlus, FiTrash2, FiSave } from "react-icons/fi";
+import toast from 'react-hot-toast';
+import { useProgramNeeds } from "../../../hooks/Tool2/useProgramNeeds";
+import { useUser } from "../../../context/UserContext";
 
 const years = ["2026", "2027", "2028", "2029", "2030"];
 
 const Tool2ProgramNeeds = () => {
+  const { user } = useUser();
+  const { 
+    loading, 
+    initialLoading, 
+    saveAllProgramNeeds, 
+    loadProgramNeeds,
+    deleteRequirement 
+  } = useProgramNeeds();
+  
   const [requirements, setRequirements] = useState([
-    { name: "Program 1", budgets: {}, comments: "" }
+    { id: null, name: "Program 1", budgets: {}, comments: "" }
   ]);
 
   const [committedFunds, setCommittedFunds] = useState([
-    { name: "Grants?", budgets: {}, comments: "" },
-    { name: "Interest Income?", budgets: {}, comments: "" },
-    { name: "Consultancy Contracts?", budgets: {}, comments: "" },
-    { name: "Conference/Membership Fees/Sponsorship?", budgets: {}, comments: "" }
+    { id: null, name: "Grants?", budgets: {}, comments: "" },
+    { id: null, name: "Interest Income?", budgets: {}, comments: "" },
+    { id: null, name: "Consultancy Contracts?", budgets: {}, comments: "" },
+    { id: null, name: "Conference/Membership Fees/Sponsorship?", budgets: {}, comments: "" }
   ]);
+
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Load data when component mounts and user is available
+  useEffect(() => {
+    if (user?.id) {
+      loadUserData();
+    }
+  }, [user?.id]);
+
+  const loadUserData = async () => {
+    const data = await loadProgramNeeds();
+    if (data.requirements.length > 0) {
+      setRequirements(data.requirements);
+    }
+    if (data.committedFunds.length > 0) {
+      setCommittedFunds(data.committedFunds);
+    }
+  };
 
   const addRequirement = () => {
     setRequirements([
       ...requirements,
-      { name: "", budgets: {}, comments: "" }
+      { id: null, name: "", budgets: {}, comments: "" }
     ]);
   };
 
-  const removeRequirement = (index) => {
-    const updated = [...requirements];
-    updated.splice(index, 1);
-    setRequirements(updated);
+  const removeRequirement = async (index) => {
+    const requirement = requirements[index];
+    
+    // If it's an existing requirement (has an id), delete from database
+    if (requirement.id) {
+      const success = await deleteRequirement(requirement.id);
+      if (success) {
+        const updated = [...requirements];
+        updated.splice(index, 1);
+        setRequirements(updated);
+        toast.success('Requirement removed successfully');
+      }
+    } else {
+      // If it's a new unsaved requirement, just remove from state
+      const updated = [...requirements];
+      updated.splice(index, 1);
+      setRequirements(updated);
+    }
   };
 
   const handleRequirementChange = (index, field, value) => {
@@ -52,6 +97,28 @@ const Tool2ProgramNeeds = () => {
     setCommittedFunds(updated);
   };
 
+  const handleSaveAll = async () => {
+    if (!user) {
+      toast.error('Please log in to save data');
+      return;
+    }
+
+    // Validate that at least one requirement has a name
+    const hasValidRequirements = requirements.some(req => req.name.trim() !== '');
+    if (!hasValidRequirements) {
+      toast.error('Please add at least one program requirement');
+      return;
+    }
+
+    setIsSaving(true);
+    const success = await saveAllProgramNeeds(requirements, committedFunds);
+    if (success) {
+      // Reload data to get updated IDs
+      await loadUserData();
+    }
+    setIsSaving(false);
+  };
+
   // Calculate totals for each year
   const calculateYearTotal = (items, year) => {
     return items.reduce((sum, item) => {
@@ -70,11 +137,40 @@ const Tool2ProgramNeeds = () => {
     return num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
+  if (initialLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-gray-500">Loading program needs...</div>
+      </div>
+    );
+  }
+
   return (
     <>
-      <h2 className="text-2xl font-bold text-[#001033] mb-4">
-        Tool 2: Program Needs List
-      </h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold text-[#001033]">
+          Tool 2: Program Needs List
+        </h2>
+        <button
+          onClick={handleSaveAll}
+          disabled={loading || isSaving || !user}
+          className={`flex items-center gap-2 px-4 py-2 bg-[#22864D] text-white rounded-lg hover:bg-[#1a6b3c] transition-colors ${
+            (loading || isSaving || !user) ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+        >
+          <FiSave />
+          {isSaving ? 'Saving...' : 'Save All Changes'}
+        </button>
+      </div>
+
+      {!user && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+          <p className="text-yellow-700">
+            Please log in to save your program needs data.
+          </p>
+        </div>
+      )}
+      
       <section className="mb-2 ">
         <h3 className="font-medium">Objectives</h3>
         <ul className="text-sm list-disc pl-6 mb-6 space-y-1">
@@ -177,6 +273,7 @@ const Tool2ProgramNeeds = () => {
                   <button
                     onClick={() => removeRequirement(index)}
                     className="text-red-500 hover:text-red-700"
+                    disabled={loading}
                   >
                     <FiTrash2 />
                   </button>
@@ -190,6 +287,7 @@ const Tool2ProgramNeeds = () => {
                 <button
                   onClick={addRequirement}
                   className="flex items-center gap-2 text-[#22864D] font-medium hover:underline"
+                  disabled={loading}
                 >
                   <FiPlus />
                   Add Requirement
@@ -228,6 +326,7 @@ const Tool2ProgramNeeds = () => {
                       value={item.budgets[year] || ""}
                       onChange={(e) => handleCommittedChange(i, year, e.target.value)}
                       className="w-full border rounded px-2 py-1 text-sm text-right"
+                      disabled={loading}
                     />
                   </td>
                 ))}
@@ -239,6 +338,7 @@ const Tool2ProgramNeeds = () => {
                     value={item.comments || ""}
                     onChange={(e) => handleCommittedCommentChange(i, e.target.value)}
                     className="w-full border rounded px-2 py-1 text-sm"
+                    disabled={loading}
                   />
                 </td>
 

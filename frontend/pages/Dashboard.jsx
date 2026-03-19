@@ -21,19 +21,27 @@ const Dashboard = () => {
   const isCompactView = compactViewTools.includes(step);
 
   return (
-    <div className="p-4">
-      <div className={`grid grid-cols-1 gap-8 transition-all duration-600 ${
-        isCompactView ? 'lg:grid-cols-[10%_90%]' : 'lg:grid-cols-3'
-      }`}>
+    <div className="p-2">
+      <div 
+        className={`grid transition-all duration-500 ease-in-out gap-4 ${
+          isCompactView ? 'grid-cols-[120px_1fr]' : 'grid-cols-[280px_1fr]'
+        }`}
+        style={{
+          gridTemplateColumns: isCompactView ? '120px 1fr' : '280px 1fr'
+        }}
+      >
         {/* LEFT SIDE - Planning Tools */}
-        <PlanningTools
-          steps={steps}
-          step={step}
-          setStep={setStep}
-        />
+        <div className="transition-all duration-500 ease-in-out">
+          <PlanningTools
+            steps={steps}
+            step={step}
+            setStep={setStep}
+            isCompactView={isCompactView}
+          />
+        </div>
 
         {/* RIGHT SIDE - Planning Content */}
-        <div className={isCompactView ? 'lg:col-span-1' : 'lg:col-span-2'}>
+        <div className="transition-all duration-500 ease-in-out">
           <PlanningContent
             step={step}
             setStep={setStep}

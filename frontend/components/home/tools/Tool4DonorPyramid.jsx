@@ -1,11 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 const HEAT_CONFIG = {
   HOT: {
     label: "HOT",
     sub: "3 C's",
-    bg: "bg-red-50",
-    border: "border-red-400",
+    bg: "bg-red-100",
+    // border: "border-red-400",
     text: "text-red-900",
     badgeBg: "bg-red-400",
     badgeText: "text-red-900",
@@ -19,8 +19,8 @@ const HEAT_CONFIG = {
   WARM: {
     label: "WARM",
     sub: "2 to 1 C's",
-    bg: "bg-yellow-50",
-    border: "border-yellow-400",
+    bg: "bg-yellow-100",
+    // border: "border-yellow-400",
     text: "text-yellow-900",
     badgeBg: "bg-yellow-200",
     badgeText: "text-yellow-900",
@@ -34,8 +34,8 @@ const HEAT_CONFIG = {
   COLD: {
     label: "COLD",
     sub: "1 to 0 C's",
-    bg: "bg-blue-50",
-    border: "border-blue-400",
+    bg: "bg-blue-100",
+    // border: "border-blue-400",
     text: "text-blue-900",
     badgeBg: "bg-blue-200",
     badgeText: "text-blue-900",
@@ -53,10 +53,10 @@ const LEVEL_ORDER = ["HIGH", "MEDIUM", "LOW"];
 
 const INITIAL_DONORS = [
   { id: 1, name: "Angela Reyes", level: "HIGH", heat: "HOT", connection: true, capability: true, concern: true},
-  // { id: 2, name: "Marco Santos", level: "HIGH", heat: "WARM", connection: true, capability: true, concern: false},
-  // { id: 3, name: "Lena Cruz", level: "MEDIUM", heat: "HOT", connection: true, capability: false, concern: true},
-  // { id: 4, name: "David Kim", level: "MEDIUM", heat: "COLD", connection: false, capability: true, concern: false},
-  // { id: 5, name: "Sofia Mendoza", level: "LOW", heat: "WARM", connection: true, capability: false, concern: false},
+  { id: 2, name: "Marco Santos", level: "HIGH", heat: "WARM", connection: true, capability: true, concern: false},
+  { id: 3, name: "Lena Cruz", level: "MEDIUM", heat: "HOT", connection: true, capability: false, concern: true},
+  { id: 4, name: "David Kim", level: "MEDIUM", heat: "COLD", connection: false, capability: true, concern: false},
+  { id: 5, name: "Sofia Mendoza", level: "LOW", heat: "WARM", connection: true, capability: false, concern: false},
 ];
 
 const getInitials = (name) =>
@@ -84,7 +84,7 @@ const DonorCard = ({ donor, onEdit, onDelete }) => {
         <div className={`w-7 h-7 rounded-full ${hc.badgeBg} flex items-center justify-center text-[10px] font-bold ${hc.badgeText} flex-shrink-0`}>
           {getInitials(donor.name)}
         </div>
-        <span className={`text-xs font-semibold ${hc.text} flex-1 leading-tight`}>
+        <span className={`text-xs font-semibold ${hc.text} flex-1 leading-tight line-clamp-2`}>
           {donor.name}
         </span>
         <button
@@ -237,6 +237,9 @@ const Tool4DonorPyramid = () => {
   const [editDonor, setEditDonor] = useState(null);
   const [filterHeat, setFilterHeat] = useState(null);
   const nextId = useRef(100);
+  const gridRef = useRef(null);
+  const [gridHeight, setGridHeight] = useState(380);
+  const [gridWidth, setGridWidth] = useState(850);
 
   const getCell = (level, heat) => donors.filter((d) => d.level === level && d.heat === heat);
   const countByHeat = (heat) => donors.filter((d) => d.heat === heat).length;
@@ -265,8 +268,18 @@ const Tool4DonorPyramid = () => {
     { label: "LOW Level", value: countByLevel("LOW"), color: "text-gray-500", bg: "bg-gray-100" },
   ];
 
+    useEffect(() => {
+      if (!gridRef.current) return;
+      const observer = new ResizeObserver(([entry]) => {
+        setGridHeight(entry.contentRect.height);
+        setGridWidth(entry.contentRect.width);
+      });
+      observer.observe(gridRef.current);
+      return () => observer.disconnect();
+    }, []);
+
   return (
-    <div className="font-sans text-gray-900 max-w-[960px] mx-auto px-1">
+    <div className="font-sans text-gray-900 max-w-auto mx-auto px-1">
       {/* Header */}
       <div className="flex justify-between items-start mb-8 flex-wrap gap-3">
         <div>
@@ -329,9 +342,9 @@ const Tool4DonorPyramid = () => {
       </div>
 
       {/* Pyramid Grid */}
-      <div className="flex flex-col items-center">
+      <div className="relative flex flex-col items-center">
         {/* Column Headers */}
-        <div className="grid grid-cols-[80px_1fr_1fr_1fr] gap-2 w-full mb-2">
+        <div className="grid grid-cols-[40px_1fr_1fr_1fr] gap-2 w-full mb-2">
           <div />
           {HEAT_ORDER.map((h) => {
             const hc = HEAT_CONFIG[h];
@@ -348,9 +361,10 @@ const Tool4DonorPyramid = () => {
         </div>
 
         {/* Rows */}
-        {LEVEL_ORDER.map((level, li) => (
+        <div ref={gridRef} className="relative z-10 w-full flex flex-col items-center">
+          {LEVEL_ORDER.map((level, li) => (
           <div key={level} className={`${PYRAMID_WIDTHS[level]} ${li === 0 ? "mx-auto" : ""} transition-all duration-300`}>
-            <div className="grid grid-cols-[80px_1fr_1fr_1fr] gap-2 items-start mb-2">
+            <div className="grid grid-cols-[40px_1fr_1fr_1fr] gap-2 items-start mb-2">
               {/* Row label */}
               <div className="flex items-center justify-end pr-2.5 pt-3">
                 <span className="text-[11px] font-bold text-[#001033] uppercase tracking-widest [writing-mode:vertical-rl] rotate-180">
@@ -367,7 +381,7 @@ const Tool4DonorPyramid = () => {
                   <div
                     key={heat}
                     className={`min-h-[120px] border-[1.5px] rounded-xl p-2.5 flex flex-col gap-2 transition-opacity duration-200 ${
-                      isFiltered ? "bg-gray-50 border-gray-200 opacity-40" : `${hc.bg} ${hc.border}`
+                      isFiltered ? "bg-gray-50 border-gray-200 opacity-40" : `${hc.border}` //${hc.bg} 
                     }`}
                   >
                     <div className="flex justify-between items-center">
@@ -391,7 +405,7 @@ const Tool4DonorPyramid = () => {
                           setEditDonor({ level, heat, connection: heat === "HOT", capability: heat !== "COLD", concern: heat === "HOT" });
                           setShowModal(true);
                         }}
-                        className={`py-1.5 bg-transparent border-[1.5px] border-dashed ${hc.border} rounded-lg ${hc.text} text-xs font-semibold cursor-pointer opacity-60 hover:opacity-100 transition-opacity duration-150`}
+                        className={`py-2 bg-transparent border-[1.5px] border-solid ${hc.border} rounded-lg ${hc.text} text-xs font-semibold cursor-pointer opacity-60 hover:opacity-100 transition-opacity duration-150`}
                       >
                         + Add
                       </button>
@@ -402,27 +416,28 @@ const Tool4DonorPyramid = () => {
             </div>
           </div>
         ))}
+        </div>
 
         {/* Pyramid base */}
-        <svg width="100%" height="24" viewBox="0 0 300 24" className="max-w-[960px] -mt-1">
-          <polygon points="150,2 0,22 300,22" fill="none" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4 3" />
+        <svg
+          viewBox={`0 0 ${gridWidth} ${gridHeight}`}
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 z-0"
+          style={{ height: gridHeight, width: gridWidth }}
+        >
+          <polygon
+            points={`${gridWidth / 2},0 0,${gridHeight} ${gridWidth},${gridHeight}`}
+            fill="#f8fafc"
+            stroke="#cbcbcb"
+            strokeWidth="2.5"
+            strokeDasharray="5 5"
+          />
         </svg>
+
       </div>
 
       {/* Legend */}
       <div className="mt-5 px-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-wrap gap-4 items-center">
         <h3 className="text-sm font-semibold text-gray-700">Three C's:</h3>
-        {/* {[
-          { label: "Connection", desc: "Relationship with your organization" },
-          { label: "Capability", desc: "Financial ability to give" },
-          { label: "Concern", desc: "Passion for your cause" },
-        ].map(({ label, desc }) => (
-          <div key={label} className="flex items-center gap-1.5">
-            <CIcon active={true} />
-            <span className="text-xs text-gray-700 font-semibold">{label}</span>
-            <span className="text-[11px] text-gray-400">{desc}</span>
-          </div>
-        ))} */}
         <p className="text-sm">Identify the different donors (both current and potential) for your Organization. Classify them into HIGH, MEDIUM, and LOW-LEVEL givers, then HOT, WARM, and COLD according to the three Cs – Connection, Capability, and Concern. Plot them on the triangle below.</p>
       </div>
 

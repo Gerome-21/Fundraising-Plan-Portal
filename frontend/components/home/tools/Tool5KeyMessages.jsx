@@ -29,9 +29,9 @@ const categories = [
 
 const Section = ({ title }) => {
   return (
-    <div className="bg-white rounded-2xl shadow p-6 mb-8">
+    <div className="bg-white rounded-2xl shadow p-6 mb-2">
 
-      <h3 className="text-lg font-bold text-[#001033] mb-6">
+      <h3 className="text-lg font-bold text-[#001033] mb-4">
         {title}
       </h3>
 

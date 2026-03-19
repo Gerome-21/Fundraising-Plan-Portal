@@ -99,8 +99,8 @@ const Tool3GiftRange = () => {
             <tr>
               <th className="px-3 py-2 text-xs">Gift Range (Amount)</th>
               <th className="px-3 py-2 text-xs">No. of Gifts</th>
-              <th className="px-3 py-2 text-xs">No. of Prospects (Gifts ×5)</th>
-              <th className="px-3 py-2 text-xs">Subtotal (Range × Gifts)</th>
+              <th className="px-3 py-2 text-xs">No. of Prospects <br/>(Gifts ×5)</th>
+              <th className="px-3 py-2 text-xs">Subtotal <br/>(Range × Gifts)</th>
               <th className="px-3 py-2 text-xs">Cumulative Total</th>
               <th className="px-3 py-2 text-xs text-center">Action</th>
             </tr>
@@ -121,7 +121,6 @@ const Tool3GiftRange = () => {
                         handleChange(index, "giftRange", e.target.value)
                       }
                       className="w-full border rounded px-2 py-1"
-                      placeholder="100000"
                     />
                   </td>
 
@@ -144,7 +143,7 @@ const Tool3GiftRange = () => {
                       type="text"
                       value={row.prospects || 0}
                       readOnly
-                      className="w-full border bg-gray-50 rounded px-2 py-1 text-gray-700"
+                      className="w-full rounded px-2 py-1 text-gray-700"
                     />
                   </td>
 
@@ -154,7 +153,7 @@ const Tool3GiftRange = () => {
                       type="text"
                       value={`₱ ${formatNumber(row.subtotal || 0)}`}
                       readOnly
-                      className="w-full border bg-gray-50 rounded px-2 py-1 text-gray-700"
+                      className="w-full rounded px-2 py-1 text-gray-700"
                     />
                   </td>
 
@@ -164,7 +163,7 @@ const Tool3GiftRange = () => {
                       type="text"
                       value={`₱ ${formatNumber(row.cumulativeTotal || 0)}`}
                       readOnly
-                      className="w-full border bg-gray-50 rounded px-2 py-1 text-gray-700"
+                      className="w-full rounded px-2 py-1 text-gray-700"
                     />
                   </td>
 

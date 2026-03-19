@@ -7,6 +7,7 @@ import Register from '../pages/Register';
 import Layout from '../components/Layout';
 import Dashboard from '../pages/Dashboard';
 import ProtectedRoute from '../routes/ProtectedRoute';
+import Homepage from '../pages/Homepage';
 
 const App = () => {
   return (
@@ -46,7 +47,7 @@ const App = () => {
               <Layout/>
             </ProtectedRoute>
           }>
-            <Route path='/home' element={<div>Home Page (Coming Soon)</div>}/> 
+            <Route path='/home' element={<Homepage/>}/> 
             <Route path='/plan' element={<Dashboard/>}/> 
             <Route path='/report' element={<div>Report Page (Coming Soon)</div>}/> 
           </Route>
