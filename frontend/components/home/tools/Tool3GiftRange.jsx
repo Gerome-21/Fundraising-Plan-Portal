@@ -1,5 +1,7 @@
-import React, { useState } from "react";
-import { FiPlus, FiTrash2 } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
+import { FiPlus, FiTrash2, FiSave } from "react-icons/fi";
+import { useGiftRange } from "../../../hooks/Tool3/useGiftRange";
+import { useUser } from "../../../context/UserContext";
 
 const Tool3GiftRange = () => {
   const [rows, setRows] = useState([
@@ -8,6 +10,10 @@ const Tool3GiftRange = () => {
       gifts: 0,
     },
   ]);
+  const { user } = useUser();
+  const { loadGiftRanges, saveGiftRanges, loading } = useGiftRange();
+  const [isSaving, setIsSaving] = useState(false);
+
 
   // ADD ROW
   const addRow = () => {
@@ -80,20 +86,44 @@ const Tool3GiftRange = () => {
     return `₱ ${formatNumber(num)}`;
   };
 
+  useEffect(() => {
+    if (user?.id) {
+      loadData();
+    }
+  }, [user?.id]);
+
+  const loadData = async () => {
+    const data = await loadGiftRanges();
+    if (data.length > 0) {
+      setRows(data);
+    }
+  };
   return (
     <>
-      <h2 className="text-2xl font-bold text-[#001033] mb-4">
-        Tool 3: Gift Range Chart
-      </h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold text-[#001033]">
+          Tool 3: Gift Range Chart
+        </h2>
 
-      <section className="mb-2 ">
-        <h3 className="font-medium">Objectives</h3>
-        <ul className="text-sm list-disc pl-6 mb-6 space-y-1">
-          <li>To have an estimated number of donors needed to strategically meet the organization's funding needs</li>
-          <li>To determine gift levels, the number of gifts needed per gift level, and the number of prospects the organization should seek as it implements its Fundraising activities</li>
-        </ul>
-      </section>
+        <button
+          onClick={async () => {
+            if (!user) {
+              toast.error("Please login first");
+              return;
+            }
 
+            setIsSaving(true);
+            await saveGiftRanges(rows);
+            setIsSaving(false);
+          }}
+          disabled={loading || isSaving}
+          className="flex items-center gap-2 px-4 py-2 bg-[#22864D] text-white rounded hover:bg-green-700 disabled:opacity-50"
+        >
+          <FiSave />
+          {isSaving ? "Saving..." : "Save"}
+        </button>
+      </div>
+      
       {/* TABLE */}
       <div className="overflow-auto rounded-xl border">
 

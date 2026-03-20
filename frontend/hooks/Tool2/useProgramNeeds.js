@@ -339,56 +339,38 @@ export const useProgramNeeds = () => {
       comments: req.comments || ''
     }));
 
-    // Define default committed funds structure
-    const defaultCommittedFunds = [
-      { name: "Grants?", budgets: {}, comments: "" },
-      { name: "Interest Income?", budgets: {}, comments: "" },
-      { name: "Consultancy Contracts?", budgets: {}, comments: "" },
-      { name: "Conference/Membership Fees/Sponsorship?", budgets: {}, comments: "" }
-    ];
+    // Transform committed funds
+    const committedFundsMap = new Map();
 
-    // Create a map of loaded committed funds
-    const loadedFundsMap = new Map();
     (fundsData || []).forEach(fund => {
-      if (!loadedFundsMap.has(fund.fund_type)) {
-        loadedFundsMap.set(fund.fund_type, {
+      if (!committedFundsMap.has(fund.fund_type)) {
+        committedFundsMap.set(fund.fund_type, {
           name: fund.fund_type,
           budgets: {},
           comments: fund.comments || ''
         });
       }
-      const fundItem = loadedFundsMap.get(fund.fund_type);
+      const fundItem = committedFundsMap.get(fund.fund_type);
       fundItem.budgets[fund.year.toString()] = fund.amount;
     });
 
-    // Merge loaded funds with default funds
-    const transformedCommittedFunds = defaultCommittedFunds.map(defaultFund => {
-      const loadedFund = loadedFundsMap.get(defaultFund.name);
-      if (loadedFund) {
-        // If fund exists in loaded data, use loaded data
-        return loadedFund;
-      } else {
-        // Otherwise, use default empty structure
-        return defaultFund;
-      }
-    });
+    const transformedCommittedFunds = Array.from(committedFundsMap.values());
 
     return {
       requirements: transformedRequirements,
-      committedFunds: transformedCommittedFunds
+      committedFunds: transformedCommittedFunds.length > 0
+        ? transformedCommittedFunds
+        : [
+            { name: "Grants?", budgets: {}, comments: "" },
+            { name: "Interest Income?", budgets: {}, comments: "" },
+            { name: "Consultancy Contracts?", budgets: {}, comments: "" },
+            { name: "Conference/Membership Fees/Sponsorship?", budgets: {}, comments: "" }
+          ]
     };
   } catch (error) {
     console.error('Error loading program needs:', error);
     toast.error('Failed to load program needs');
-    return { 
-      requirements: [], 
-      committedFunds: [
-        { name: "Grants?", budgets: {}, comments: "" },
-        { name: "Interest Income?", budgets: {}, comments: "" },
-        { name: "Consultancy Contracts?", budgets: {}, comments: "" },
-        { name: "Conference/Membership Fees/Sponsorship?", budgets: {}, comments: "" }
-      ] 
-    };
+    return { requirements: [], committedFunds: [] };
   } finally {
     setInitialLoading(false);
   }
