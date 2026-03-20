@@ -48,16 +48,16 @@ const Tool3GiftRange = () => {
     };
   });
 
-  // Calculate cumulative totals
+  // Calculate cumulative totals (running total)
   const rowsWithCumulative = computedRows.map((row, index) => {
-    // Cumulative Total = previous cumulative + current subtotal
-    const cumulativeTotal = computedRows
-      .slice(0, index + 1)
-      .reduce((sum, r) => sum + (r.subtotal || 0), 0);
+    let runningTotal = 0;
+    for (let i = 0; i <= index; i++) {
+      runningTotal += computedRows[i].subtotal;
+    }
     
     return {
       ...row,
-      cumulativeTotal,
+      cumulativeTotal: runningTotal,
     };
   });
 
@@ -65,14 +65,19 @@ const Tool3GiftRange = () => {
   const totalGifts = rowsWithCumulative.reduce((sum, row) => sum + (Number(row.gifts) || 0), 0);
   const totalProspects = rowsWithCumulative.reduce((sum, row) => sum + (row.prospects || 0), 0);
   const totalSubtotal = rowsWithCumulative.reduce((sum, row) => sum + (row.subtotal || 0), 0);
-  const totalCumulative = rowsWithCumulative.length > 0 
-    ? rowsWithCumulative[rowsWithCumulative.length - 1].cumulativeTotal 
-    : 0;
+  const totalCumulative = rowsWithCumulative.reduce(
+    (sum, row) => sum + (row.cumulativeTotal || 0),
+    0
+  );
 
   // Format number with commas
   const formatNumber = (num) => {
-    if (num === 0) return "0";
+    if (num === 0 || !num) return "0";
     return num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  const formatCurrency = (num) => {
+    return `₱ ${formatNumber(num)}`;
   };
 
   return (
@@ -84,7 +89,7 @@ const Tool3GiftRange = () => {
       <section className="mb-2 ">
         <h3 className="font-medium">Objectives</h3>
         <ul className="text-sm list-disc pl-6 mb-6 space-y-1">
-          <li>To have an estimated number of donors needed to strategically meet the organization’s funding needs</li>
+          <li>To have an estimated number of donors needed to strategically meet the organization's funding needs</li>
           <li>To determine gift levels, the number of gifts needed per gift level, and the number of prospects the organization should seek as it implements its Fundraising activities</li>
         </ul>
       </section>
@@ -121,6 +126,7 @@ const Tool3GiftRange = () => {
                         handleChange(index, "giftRange", e.target.value)
                       }
                       className="w-full border rounded px-2 py-1"
+                      placeholder="Enter amount"
                     />
                   </td>
 
@@ -134,6 +140,7 @@ const Tool3GiftRange = () => {
                         handleChange(index, "gifts", e.target.value)
                       }
                       className="w-full border rounded px-2 py-1"
+                      placeholder="0"
                     />
                   </td>
 
@@ -143,7 +150,7 @@ const Tool3GiftRange = () => {
                       type="text"
                       value={row.prospects || 0}
                       readOnly
-                      className="w-full rounded px-2 py-1 text-gray-700"
+                      className="w-full rounded px-2 py-1 bg-gray-50 text-gray-700"
                     />
                   </td>
 
@@ -151,9 +158,9 @@ const Tool3GiftRange = () => {
                   <td className="p-2">
                     <input
                       type="text"
-                      value={`₱ ${formatNumber(row.subtotal || 0)}`}
+                      value={formatCurrency(row.subtotal || 0)}
                       readOnly
-                      className="w-full rounded px-2 py-1 text-gray-700"
+                      className="w-full rounded px-2 py-1 bg-gray-50 text-gray-700 text-right"
                     />
                   </td>
 
@@ -161,9 +168,9 @@ const Tool3GiftRange = () => {
                   <td className="p-2">
                     <input
                       type="text"
-                      value={`₱ ${formatNumber(row.cumulativeTotal || 0)}`}
+                      value={formatCurrency(row.cumulativeTotal || 0)}
                       readOnly
-                      className="w-full rounded px-2 py-1 text-gray-700"
+                      className="w-full rounded px-2 py-1 bg-gray-50 text-gray-700 font-semibold text-right"
                     />
                   </td>
 
@@ -195,15 +202,14 @@ const Tool3GiftRange = () => {
           </tbody>
 
           {/* FOOTER - TOTALS */}
-          <tfoot className="bg-gray-100 font-bold">
+          <tfoot className="bg-gray-100 font-bold border-t-2 border-gray-300">
             <tr>
-              <td className="px-3 py-3">TOTAL</td>
-              <td className="px-3 py-3 text-right">{totalGifts}</td>
-              <td className="px-3 py-3 text-right">{totalProspects}</td>
-              {/* <td className="px-3 py-3 text-right">₱ {formatNumber(totalSubtotal)}</td>
-              <td className="px-3 py-3 text-right">₱ {formatNumber(totalCumulative)}</td> */}
-              <td className="px-3 py-3 text-right">-</td>
-              <td className="px-3 py-3 text-right">-</td>
+              <td className="px-3 py-3 text-sm">TOTAL</td>
+              <td className="px-3 py-3 text-left">{totalGifts}</td>
+              <td className="px-3 py-3 text-left">{totalProspects}</td>
+              <td className="px-3 py-3 text-right">{formatCurrency(totalSubtotal)}</td>
+              <td className="px-3 py-3 text-right">{formatCurrency(totalCumulative)}</td>
+              <td className="px-3 py-3"></td>
             </tr>
           </tfoot>
 
