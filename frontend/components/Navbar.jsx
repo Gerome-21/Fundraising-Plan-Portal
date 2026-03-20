@@ -16,7 +16,7 @@ const Navbar = () => {
   return (
     <nav className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm py-4 px-4 sm:px-8 lg:px-12 flex items-center justify-between z-50">
       {/* Logo Section */}
-      <Link to="/home" className="flex items-center space-x-3 group">
+      <Link to="/dashboard" className="flex items-center space-x-3 group">
         <div className="relative">
           <img 
             src="/akubo.jpg" 
@@ -35,7 +35,7 @@ const Navbar = () => {
 
       <div className="hidden lg:flex items-center space-x-8">
         <Link 
-          to="/home"
+          to="/dashboard"
           className="text-md text-[#001033] hover:text-green-600 transition-colors font-medium relative group"
         >
           Home
@@ -89,7 +89,7 @@ const Navbar = () => {
         <div className="absolute top-full left-0 right-0 bg-white border-b shadow-lg lg:hidden">
           <div className="px-4 py-4 space-y-4">
             <Link 
-              to="/home"
+              to="/dashboard"
               className="block text-[#001033] hover:text-green-600 py-2"
               onClick={() => setIsMenuOpen(false)}
             >

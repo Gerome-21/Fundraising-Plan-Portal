@@ -3,6 +3,7 @@ import { FiPlus, FiTrash2, FiSave } from "react-icons/fi";
 import toast from 'react-hot-toast';
 import { useProgramNeeds } from "../../../hooks/Tool2/useProgramNeeds";
 import { useUser } from "../../../context/UserContext";
+import SkeletonLoader from "../../Tool2Components/SkeletonLoader";
 
 const years = ["2026", "2027", "2028", "2029", "2030"];
 
@@ -28,6 +29,7 @@ const Tool2ProgramNeeds = () => {
   ]);
 
   const [isSaving, setIsSaving] = useState(false);
+  const [deletingIndex, setDeletingIndex] = useState(null);
 
   // Load data when component mounts and user is available
   useEffect(() => {
@@ -55,8 +57,10 @@ const Tool2ProgramNeeds = () => {
 
   const removeRequirement = async (index) => {
     const requirement = requirements[index];
-    
-    // If it's an existing requirement (has an id), delete from database
+
+    // set deleting state
+    setDeletingIndex(index);
+
     if (requirement.id) {
       const success = await deleteRequirement(requirement.id);
       if (success) {
@@ -66,11 +70,13 @@ const Tool2ProgramNeeds = () => {
         toast.success('Requirement removed successfully');
       }
     } else {
-      // If it's a new unsaved requirement, just remove from state
       const updated = [...requirements];
       updated.splice(index, 1);
       setRequirements(updated);
     }
+
+    // clear deleting state
+    setDeletingIndex(null);
   };
 
   const handleRequirementChange = (index, field, value) => {
@@ -139,9 +145,9 @@ const Tool2ProgramNeeds = () => {
 
   if (initialLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-gray-500">Loading program needs...</div>
-      </div>
+      <>
+        <SkeletonLoader/>
+      </>
     );
   }
 
@@ -162,14 +168,6 @@ const Tool2ProgramNeeds = () => {
           {isSaving ? 'Saving...' : 'Save All Changes'}
         </button>
       </div>
-
-      {!user && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-          <p className="text-yellow-700">
-            Please log in to save your program needs data.
-          </p>
-        </div>
-      )}
       
       <section className="mb-2 ">
         <h3 className="font-medium">Objectives</h3>
@@ -213,7 +211,12 @@ const Tool2ProgramNeeds = () => {
           {/* PROGRAM REQUIREMENTS */}
           <tbody>
             {requirements.map((req, index) => (
-              <tr key={index} className="border-t hover:bg-gray-50">
+              <tr
+                key={index}
+                className={`border-t transition-colors duration-300 
+                  ${deletingIndex === index ? 'bg-red-100' : 'hover:bg-gray-50'}
+                `}
+              >
 
                 {/* Requirement name */}
                 <td className="p-2">
@@ -325,7 +328,7 @@ const Tool2ProgramNeeds = () => {
                       placeholder="0.00"
                       value={item.budgets[year] || ""}
                       onChange={(e) => handleCommittedChange(i, year, e.target.value)}
-                      className="w-full border rounded px-2 py-1 text-sm text-right"
+                      className="w-full border rounded px-2 py-1 text-sm text-right text-xs"
                       disabled={loading}
                     />
                   </td>
@@ -337,7 +340,7 @@ const Tool2ProgramNeeds = () => {
                     placeholder="Comments"
                     value={item.comments || ""}
                     onChange={(e) => handleCommittedCommentChange(i, e.target.value)}
-                    className="w-full border rounded px-2 py-1 text-sm"
+                    className="w-full border rounded px-2 py-1 text-xs"
                     disabled={loading}
                   />
                 </td>

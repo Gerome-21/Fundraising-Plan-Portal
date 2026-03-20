@@ -47,8 +47,8 @@ const App = () => {
               <Layout/>
             </ProtectedRoute>
           }>
-            <Route path='/home' element={<Homepage/>}/> 
-            <Route path='/plan' element={<Dashboard/>}/> 
+            <Route path='/dashboard' element={<Dashboard/>}/> 
+            <Route path='/plan' element={<Homepage/>}/> 
             <Route path='/report' element={<div>Report Page (Coming Soon)</div>}/> 
           </Route>
         </Routes>

@@ -52,7 +52,7 @@ const Login = () => {
     );
 
     if (success) {
-      navigate('/home');
+      navigate('dashboard');
     }
 
     setLoading(false);
