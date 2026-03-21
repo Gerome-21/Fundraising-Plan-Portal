@@ -64,7 +64,6 @@ export const useGiftRange = () => {
         if (insertError) throw insertError;
       }
 
-      toast.success("Saved successfully!");
       return true;
 
     } catch (err) {

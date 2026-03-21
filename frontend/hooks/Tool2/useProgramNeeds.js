@@ -174,32 +174,32 @@ export const useProgramNeeds = () => {
 
   // Delete a requirement and all related data
   const deleteRequirement = async (requirementId) => {
-    if (!user?.id) return false;
-    try {
-      // Delete all related budgets
-      const { error: budgetsError } = await supabase
-        .from('program_requirement_budgets')
-        .delete()
-        .eq('requirement_id', requirementId);
+  if (!user?.id) return false;
+  try {
+    // Delete all related budgets
+    const { error: budgetsError } = await supabase
+      .from('program_requirement_budgets')
+      .delete()
+      .eq('requirement_id', requirementId);
 
-      if (budgetsError) throw budgetsError;
+    if (budgetsError) throw budgetsError;
 
-      // Delete the requirement itself
-      const { error } = await supabase
-        .from('program_requirements')
-        .delete()
-        .eq('id', requirementId)
-        .eq('user_id', user.id);
+    // Delete the requirement itself
+    const { error } = await supabase
+      .from('program_requirements')
+      .delete()
+      .eq('id', requirementId)
+      .eq('user_id', user.id);
 
-      if (error) throw error;
+    if (error) throw error;
 
-      return true;
-    } catch (error) {
-      console.error('Error deleting requirement:', error);
-      toast.error('Failed to delete requirement');
-      return false;
-    }
-  };
+    return true;
+  } catch (error) {
+    console.error('Error deleting requirement:', error);
+    // Remove toast notification from here
+    return false;
+  }
+};
 
   // Save all program needs data at once
   const saveAllProgramNeeds = async (requirements, committedFundsList) => {
@@ -286,7 +286,6 @@ export const useProgramNeeds = () => {
       }
     }
 
-    toast.success('All program needs saved successfully');
     return true;
   } catch (error) {
     console.error('Error saving all program needs:', error);
@@ -339,38 +338,56 @@ export const useProgramNeeds = () => {
       comments: req.comments || ''
     }));
 
-    // Transform committed funds
-    const committedFundsMap = new Map();
+    // Define default committed funds structure
+    const defaultCommittedFunds = [
+      { name: "Grants?", budgets: {}, comments: "" },
+      { name: "Interest Income?", budgets: {}, comments: "" },
+      { name: "Consultancy Contracts?", budgets: {}, comments: "" },
+      { name: "Conference/Membership Fees/Sponsorship?", budgets: {}, comments: "" }
+    ];
 
+    // Create a map of loaded committed funds
+    const loadedFundsMap = new Map();
     (fundsData || []).forEach(fund => {
-      if (!committedFundsMap.has(fund.fund_type)) {
-        committedFundsMap.set(fund.fund_type, {
+      if (!loadedFundsMap.has(fund.fund_type)) {
+        loadedFundsMap.set(fund.fund_type, {
           name: fund.fund_type,
           budgets: {},
           comments: fund.comments || ''
         });
       }
-      const fundItem = committedFundsMap.get(fund.fund_type);
+      const fundItem = loadedFundsMap.get(fund.fund_type);
       fundItem.budgets[fund.year.toString()] = fund.amount;
     });
 
-    const transformedCommittedFunds = Array.from(committedFundsMap.values());
+    // Merge loaded funds with default funds
+    const transformedCommittedFunds = defaultCommittedFunds.map(defaultFund => {
+      const loadedFund = loadedFundsMap.get(defaultFund.name);
+      if (loadedFund) {
+        // If fund exists in loaded data, use loaded data
+        return loadedFund;
+      } else {
+        // Otherwise, use default empty structure
+        return defaultFund;
+      }
+    });
 
     return {
       requirements: transformedRequirements,
-      committedFunds: transformedCommittedFunds.length > 0
-        ? transformedCommittedFunds
-        : [
-            { name: "Grants?", budgets: {}, comments: "" },
-            { name: "Interest Income?", budgets: {}, comments: "" },
-            { name: "Consultancy Contracts?", budgets: {}, comments: "" },
-            { name: "Conference/Membership Fees/Sponsorship?", budgets: {}, comments: "" }
-          ]
+      committedFunds: transformedCommittedFunds
     };
   } catch (error) {
     console.error('Error loading program needs:', error);
     toast.error('Failed to load program needs');
-    return { requirements: [], committedFunds: [] };
+    return { 
+      requirements: [], 
+      committedFunds: [
+        { name: "Grants?", budgets: {}, comments: "" },
+        { name: "Interest Income?", budgets: {}, comments: "" },
+        { name: "Consultancy Contracts?", budgets: {}, comments: "" },
+        { name: "Conference/Membership Fees/Sponsorship?", budgets: {}, comments: "" }
+      ] 
+    };
   } finally {
     setInitialLoading(false);
   }

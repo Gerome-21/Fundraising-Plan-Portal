@@ -85,7 +85,7 @@ const Tool1SelfAssessment = () => {
         console.error('Error saving SWOT:', result.error);
         toast.error('Failed to save SWOT analysis');
       } else {
-        toast.success(existingData ? 'SWOT analysis updated successfully!' : 'SWOT analysis saved successfully!');
+        toast.success(existingData ? 'Successfully updated!' : 'Successfully saved!');
       }
     } catch (error) {
       console.error('Unexpected error:', error);

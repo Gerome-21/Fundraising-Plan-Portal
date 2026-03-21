@@ -16,6 +16,9 @@ const Tool2ProgramNeeds = () => {
     loadProgramNeeds,
     deleteRequirement 
   } = useProgramNeeds();
+
+  const [deletedRequirementIds, setDeletedRequirementIds] = useState([]);
+  const [pendingDeleteRequirements, setPendingDeleteRequirements] = useState([]);
   
   const [requirements, setRequirements] = useState([
     { id: null, name: "Program 1", budgets: {}, comments: "" }
@@ -55,29 +58,37 @@ const Tool2ProgramNeeds = () => {
     ]);
   };
 
-  const removeRequirement = async (index) => {
-    const requirement = requirements[index];
-
-    // set deleting state
-    setDeletingIndex(index);
-
-    if (requirement.id) {
-      const success = await deleteRequirement(requirement.id);
-      if (success) {
-        const updated = [...requirements];
-        updated.splice(index, 1);
-        setRequirements(updated);
-        toast.success('Requirement removed successfully');
-      }
-    } else {
-      const updated = [...requirements];
-      updated.splice(index, 1);
-      setRequirements(updated);
-    }
-
-    // clear deleting state
+  const removeRequirement = (index) => {
+  const requirement = requirements[index];
+  
+  // Mark the row for deletion visually
+  setDeletingIndex(index);
+  
+  // If it's an existing requirement (has an id), mark it for pending deletion
+  if (requirement.id) {
+    // Add to pending delete list (to keep visual indicator)
+    setPendingDeleteRequirements(prev => [...prev, requirement.id]);
+    // Also add to deleted IDs list for database deletion
+    setDeletedRequirementIds(prev => [...prev, requirement.id]);
+  } else {
+    // If it's a new unsaved requirement, remove immediately
+    const updated = [...requirements];
+    updated.splice(index, 1);
+    setRequirements(updated);
+  }
+  
+  // Clear deleting state
+  setTimeout(() => {
     setDeletingIndex(null);
-  };
+  }, 300);
+  
+  // Show a different message indicating it will be deleted on save
+  if (requirement.id) {
+    toast.success('Requirement marked for deletion. Click Save to confirm.');
+  } else {
+    toast.success('Requirement removed');
+  }
+};
 
   const handleRequirementChange = (index, field, value) => {
     const updated = [...requirements];
@@ -104,26 +115,51 @@ const Tool2ProgramNeeds = () => {
   };
 
   const handleSaveAll = async () => {
-    if (!user) {
-      toast.error('Please log in to save data');
-      return;
-    }
+  if (!user) {
+    toast.error('Please log in to save data');
+    return;
+  }
 
-    // Validate that at least one requirement has a name
-    const hasValidRequirements = requirements.some(req => req.name.trim() !== '');
-    if (!hasValidRequirements) {
-      toast.error('Please add at least one program requirement');
-      return;
-    }
+  // Filter out pending delete requirements before validation
+  const activeRequirements = requirements.filter(
+    req => !pendingDeleteRequirements.includes(req.id)
+  );
 
-    setIsSaving(true);
-    const success = await saveAllProgramNeeds(requirements, committedFunds);
+  // Validate that at least one requirement has a name
+  const hasValidRequirements = activeRequirements.some(req => req.name.trim() !== '');
+  if (!hasValidRequirements) {
+    toast.error('Please add at least one program requirement');
+    return;
+  }
+
+  setIsSaving(true);
+  
+  try {
+    // First, delete all marked requirements from database
+    if (deletedRequirementIds.length > 0) {
+      for (const id of deletedRequirementIds) {
+        await deleteRequirement(id);
+      }
+    }
+    
+    // Then save all active requirements (excluding pending deletes)
+    const success = await saveAllProgramNeeds(activeRequirements, committedFunds);
+    
     if (success) {
-      // Reload data to get updated IDs
-      await loadUserData();
+      // Clear deleted IDs and pending delete after successful save
+      setDeletedRequirementIds([]);
+      setPendingDeleteRequirements([]);
+      // Update requirements to only show active ones
+      setRequirements(activeRequirements);
+      toast.success('Successfully saved!');
     }
+  } catch (error) {
+    console.error('Error saving:', error);
+    toast.error('Failed to save changes');
+  } finally {
     setIsSaving(false);
-  };
+  }
+};
 
   // Calculate totals for each year
   const calculateYearTotal = (items, year) => {
@@ -210,80 +246,96 @@ const Tool2ProgramNeeds = () => {
 
           {/* PROGRAM REQUIREMENTS */}
           <tbody>
-            {requirements.map((req, index) => (
-              <tr
-                key={index}
-                className={`border-t transition-colors duration-300 
-                  ${deletingIndex === index ? 'bg-red-100' : 'hover:bg-gray-50'}
-                `}
-              >
-
-                {/* Requirement name */}
-                <td className="p-2">
-                  <input
-                    type="text"
-                    placeholder="Program Requirement"
-                    value={req.name}
-                    onChange={(e) =>
-                      handleRequirementChange(
-                        index,
-                        "name",
-                        e.target.value
-                      )
-                    }
-                    className="w-full border rounded px-2 py-1 text-xs"
-                  />
-                </td>
-
-                {/* Budgets */}
-                {years.map((year) => (
-                  <td key={year} className="p-2">
+            {requirements.map((req, index) => {
+              const isPendingDelete = req.id && pendingDeleteRequirements.includes(req.id);
+              
+              return (
+                <tr
+                  key={index}
+                  className={`border-t transition-colors duration-300 
+                    ${deletingIndex === index ? 'bg-red-200' : ''}
+                    ${isPendingDelete ? 'bg-red-100 line-through text-gray-500' : 'hover:bg-gray-50'}
+                  `}
+                >
+                  {/* Requirement name */}
+                  <td className="p-2">
                     <input
-                      type="number"
-                      placeholder="0.00"
-                      value={req.budgets[year] || ""}
+                      type="text"
+                      placeholder="Program Requirement"
+                      value={req.name}
                       onChange={(e) =>
-                        handleRequirementBudgetChange(
+                        handleRequirementChange(
                           index,
-                          year,
+                          "name",
                           e.target.value
                         )
                       }
-                      className="w-full border rounded px-2 py-1 text-xs text-right"
+                      className={`w-full border rounded px-2 py-1 text-xs ${
+                        isPendingDelete ? 'bg-gray-100 text-gray-500' : ''
+                      }`}
+                      disabled={isPendingDelete || loading || isSaving}
                     />
                   </td>
-                ))}
 
-                {/* Comments */}
-                <td className="p-2">
-                  <input
-                    type="text"
-                    placeholder="Comments"
-                    value={req.comments}
-                    onChange={(e) =>
-                      handleRequirementChange(
-                        index,
-                        "comments",
-                        e.target.value
-                      )
-                    }
-                    className="w-full border rounded px-2 py-1 text-xs"
-                  />
-                </td>
+                  {/* Budgets */}
+                  {years.map((year) => (
+                    <td key={year} className="p-2">
+                      <input
+                        type="number"
+                        placeholder="0.00"
+                        value={req.budgets[year] || ""}
+                        onChange={(e) =>
+                          handleRequirementBudgetChange(
+                            index,
+                            year,
+                            e.target.value
+                          )
+                        }
+                        className={`w-full border rounded px-2 py-1 text-xs text-right ${
+                          isPendingDelete ? 'bg-gray-100 text-gray-500' : ''
+                        }`}
+                        disabled={isPendingDelete || loading || isSaving}
+                      />
+                    </td>
+                  ))}
 
-                {/* Delete */}
-                <td className="text-center">
-                  <button
-                    onClick={() => removeRequirement(index)}
-                    className="text-red-500 hover:text-red-700"
-                    disabled={loading}
-                  >
-                    <FiTrash2 />
-                  </button>
-                </td>
-              </tr>
-            ))}
+                  {/* Comments */}
+                  <td className="p-2">
+                    <input
+                      type="text"
+                      placeholder="Comments"
+                      value={req.comments}
+                      onChange={(e) =>
+                        handleRequirementChange(
+                          index,
+                          "comments",
+                          e.target.value
+                        )
+                      }
+                      className={`w-full border rounded px-2 py-1 text-xs ${
+                        isPendingDelete ? 'bg-gray-100 text-gray-500' : ''
+                      }`}
+                      disabled={isPendingDelete || loading || isSaving}
+                    />
+                  </td>
 
+                  {/* Delete */}
+                  <td className="text-center">
+                    <button
+                      onClick={() => removeRequirement(index)}
+                      className={`${
+                        isPendingDelete 
+                          ? 'text-gray-400 cursor-not-allowed' 
+                          : 'text-red-500 hover:text-red-700'
+                      }`}
+                      disabled={loading || isSaving || isPendingDelete}
+                    >
+                      <FiTrash2 />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
             {/* Add Row */}
             <tr>
               <td colSpan={8} className="p-3">
