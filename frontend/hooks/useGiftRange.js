@@ -1,7 +1,7 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { useUser } from "../../context/UserContext";
-import supabase from "../../src/supabase-connect";
+import { useUser } from "../context/UserContext";
+import supabase from "../src/supabase-connect";
 
 export const useGiftRange = () => {
   const { user } = useUser();

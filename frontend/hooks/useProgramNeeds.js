@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import supabase from '../../src/supabase-connect';
-import { useUser } from '../../context/UserContext';
+import supabase from '../src/supabase-connect';
+import { useUser } from '../context/UserContext';
 
 export const useProgramNeeds = () => {
   const { user } = useUser();

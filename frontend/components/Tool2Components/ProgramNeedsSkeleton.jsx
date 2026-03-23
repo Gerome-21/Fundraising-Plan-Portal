@@ -1,7 +1,8 @@
 import React from 'react'
 
-const SkeletonLoader = () => {
-  const years = ["2026", "2027", "2028", "2029", "2030"];
+const years = ["2026", "2027", "2028", "2029", "2030"];
+
+const ProgramNeedsSkeleton = () => {
   return (
     <div className="animate-pulse">
       
@@ -82,4 +83,4 @@ const SkeletonLoader = () => {
   )
 }
 
-export default SkeletonLoader
+export default ProgramNeedsSkeleton

@@ -1,6 +1,6 @@
 import React from 'react'
 
-const SkeletonLoader = () => {
+const GiftRangeSkeleton = () => {
   return (
     <div className="animate-pulse">
       
@@ -59,4 +59,4 @@ const SkeletonLoader = () => {
   )
 }
 
-export default SkeletonLoader
+export default GiftRangeSkeleton

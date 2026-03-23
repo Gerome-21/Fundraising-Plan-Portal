@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { FiPlus, FiTrash2, FiSave } from "react-icons/fi";
 import toast from 'react-hot-toast';
-import { useProgramNeeds } from "../../../hooks/Tool2/useProgramNeeds";
+import { useProgramNeeds } from "../../../hooks/useProgramNeeds";
 import { useUser } from "../../../context/UserContext";
-import SkeletonLoader from "../../Tool2Components/SkeletonLoader";
+import ProgramNeedsSkeleton from "../../Tool2Components/ProgramNeedsSkeleton";
+
 
 const years = ["2026", "2027", "2028", "2029", "2030"];
 
@@ -182,7 +183,7 @@ const Tool2ProgramNeeds = () => {
   if (initialLoading) {
     return (
       <>
-        <SkeletonLoader/>
+        <ProgramNeedsSkeleton/>
       </>
     );
   }
@@ -201,12 +202,12 @@ const Tool2ProgramNeeds = () => {
           }`}
         >
           <FiSave />
-          {isSaving ? 'Saving...' : 'Save All Changes'}
+          {isSaving ? 'Saving...' : 'Save Changes'}
         </button>
       </div>
       
-      <section className="mb-2 ">
-        <h3 className="font-medium">Objectives</h3>
+      <section className="mb-6 ">
+        <h3 className="font-semibold mb-2">Objectives</h3>
         <ul className="text-sm list-disc pl-6 mb-6 space-y-1">
           <li>To determine the funds needed by the program</li>
           <li>To identify the difference between the program requirements and the committed funds</li>

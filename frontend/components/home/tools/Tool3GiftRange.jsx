@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { FiPlus, FiTrash2, FiSave } from "react-icons/fi";
-import { useGiftRange } from "../../../hooks/Tool3/useGiftRange";
+import { useGiftRange } from "../../../hooks/useGiftRange";
 import { useUser } from "../../../context/UserContext";
 import toast from "react-hot-toast";
-import SkeletonLoader from "../../Tool3Components/SkeletonLoader";
+import GiftRangeSkeleton from "../../Tool3Components/GiftRangeSkeleton";
 
 const Tool3GiftRange = () => {
   const [rows, setRows] = useState([
@@ -135,7 +135,7 @@ const Tool3GiftRange = () => {
   if (initialLoading) {
       return (
         <>
-          <SkeletonLoader/>
+          <GiftRangeSkeleton/>
         </>
       );
     }
@@ -173,11 +173,11 @@ const Tool3GiftRange = () => {
           className="flex items-center gap-2 px-4 py-2 bg-[#22864D] text-white rounded hover:bg-green-700 disabled:opacity-50"
         >
           <FiSave />
-          {isSaving ? "Saving..." : "Save All Changes"}
+          {isSaving ? "Saving..." : "Save Changes"}
         </button>
       </div>
-      <section className="mb-2 ">
-        <h3 className="font-medium">Objectives</h3>
+      <section className="mb-6 ">
+        <h3 className="font-semibold mb-2">Objectives</h3>
         <ul className="text-sm list-disc pl-6 mb-6 space-y-1">
           <li>To have an estimated number of donors needed to strategically meet the organization’s funding needs</li>
           <li>To determine gift levels, the number of gifts needed per gift level, and the number of prospects the organization should seek as it implements its Fundraising activities</li>

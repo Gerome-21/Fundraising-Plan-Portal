@@ -263,8 +263,8 @@ const handleDeleteChart = async () => {
       <h2 className="text-2xl font-bold text-[#121212] mb-4">
         Tool 1: Self Assessment
       </h2>
-      <section className="mb-2">
-        <h3 className="font-medium">Objectives</h3>
+      <section className="mb-6">
+        <h3 className="font-semibold mb-2">Objectives</h3>
         <ul className="text-sm list-disc pl-6 mb-4 space-y-1">
           <li>To evaluate your Organization's Fund Raising readiness and capacity</li>
           <li>To identify factors in your internal and external environments that affect its ability to raise funds</li>
@@ -346,7 +346,7 @@ const handleDeleteChart = async () => {
             className={`flex items-center gap-2 px-4 py-2 bg-[#22864D] text-white rounded-lg hover:bg-[#22864D]/90 transition-all ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
           >
             <FiSave className="w-4 h-4" />
-            {loading ? 'Saving...' : 'Save SWOT Analysis'}
+            {loading ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
         
