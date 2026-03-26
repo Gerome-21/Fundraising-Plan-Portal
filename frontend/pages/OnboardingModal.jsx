@@ -136,7 +136,7 @@ const PreliminaryForm = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-100 to-green-500 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-200 to-green-500 flex items-center justify-center p-4">
       
 
       {/* Onboarding Modal */}
