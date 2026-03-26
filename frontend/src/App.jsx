@@ -2,13 +2,11 @@ import React from 'react';
 import { Toaster } from 'react-hot-toast';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { UserProvider } from '../context/UserContext';
-import Login from '../pages/Login';
 import Layout from '../components/Layout';
 import Dashboard from '../pages/Dashboard';
 import ProtectedRoute from '../routes/ProtectedRoute';
 import Homepage from '../pages/Homepage';
-import Onboarding from '../pages/Onboarding ';
-import PreliminaryForm from '../pages/OnboardingModal ';
+import PreliminaryForm from '../pages/OnboardingModal';
 
 const App = () => {
   return (
@@ -39,7 +37,7 @@ const App = () => {
         />
         <Routes>
           {/* Public Pages*/}
-          <Route path='/' element={<Login/>} />
+          <Route path='/' element={<PreliminaryForm/>} />
           
           {/* User Pages - Protected Routes */}
           <Route element={

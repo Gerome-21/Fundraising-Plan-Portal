@@ -24,32 +24,53 @@ export const UserProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (organization_name, user_name, pin) => {
+  const login = async (organization_name, user_name) => {
     try {
-      const { data, error } = await supabase
+      // First, try to find existing user
+      const { data: existingUser, error: findError } = await supabase
         .from('users')
         .select('*')
         .eq('organization_name', organization_name)
         .eq('user_name', user_name)
-        .eq('pin', pin);
+        .maybeSingle();
 
-      if (error) {
-        console.error('Login error:', error);
-        toast.error('An error occurred during login');
+      if (findError && findError.code !== 'PGRST116') {
+        console.error('Error finding user:', findError);
+        toast.error('An error occurred');
         return false;
       }
 
-      if (!data || data.length === 0) {
-        toast.error('Invalid credentials');
-        return false;
-      }
+      let userData;
 
-      const userData = data[0];
+      if (existingUser) {
+        // User exists - log them in
+        userData = existingUser;
+        toast.success(`Welcome back, ${userData.user_name}!`);
+      } else {
+        // User doesn't exist - create new user
+        const { data: newUser, error: insertError } = await supabase
+          .from('users')
+          .insert([{
+            organization_name: organization_name,
+            user_name: user_name,
+            created_at: new Date().toISOString()
+          }])
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Error creating user:', insertError);
+          toast.error('Failed to create account');
+          return false;
+        }
+
+        userData = newUser;
+        toast.success(`Welcome, ${userData.user_name}! Your account has been created.`);
+      }
+      const { ...userWithoutSensitive } = userData;
+      setUser(userWithoutSensitive);
+      localStorage.setItem('akubo_user', JSON.stringify(userWithoutSensitive));
       
-      const { pin: _, ...userWithoutPin } = userData;
-      setUser(userWithoutPin);
-      localStorage.setItem('akubo_user', JSON.stringify(userWithoutPin));
-      toast.success('Login successful!');
       return true;
       
     } catch (error) {
@@ -59,6 +80,7 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+  // Logout function
   const logout = () => {
     setUser(null);
     localStorage.removeItem('akubo_user');
@@ -67,9 +89,9 @@ export const UserProvider = ({ children }) => {
 
   const value = {
     user,
+    loading,
     login,
-    logout,
-    loading
+    logout
   };
 
   return (

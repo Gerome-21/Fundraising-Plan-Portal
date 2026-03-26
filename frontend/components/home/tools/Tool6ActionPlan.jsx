@@ -259,7 +259,7 @@ const Tool6ActionPlan = () => {
                   pendingDeletePrograms.includes(program.id) ? 'bg-red-100' : ''
                 }`}>
                   <td colSpan="13" className="px-4 py-3">
-                    <div className="flex items-center justify-center">
+                    <div className="flex items-center justify-start">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => toggleProgram(program.id)}
