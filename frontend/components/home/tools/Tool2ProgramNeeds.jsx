@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { FiPlus, FiTrash2, FiSave } from "react-icons/fi";
+import { FiPlus, FiTrash2, FiSave, FiMessageSquare } from "react-icons/fi";
 import toast from 'react-hot-toast';
 import { useProgramNeeds } from "../../../hooks/useProgramNeeds";
 import { useUser } from "../../../context/UserContext";
 import ProgramNeedsSkeleton from "../../Tool2Components/ProgramNeedsSkeleton";
-
+import CommentModal from "../../Tool2Components/CommentModal";
 
 const years = ["2026", "2027", "2028", "2029", "2030"];
 
@@ -31,6 +31,52 @@ const Tool2ProgramNeeds = () => {
     { id: null, name: "Consultancy Contracts?", budgets: {}, comments: "" },
     { id: null, name: "Conference/Membership Fees/Sponsorship?", budgets: {}, comments: "" }
   ]);
+
+  const [commentModalState, setCommentModalState] = useState({
+    isOpen: false,
+    targetType: null, // 'requirement' or 'committed'
+    index: null,
+    comment: '',
+    position: { top: 0, left: 0 }
+  });
+
+  // Open comment modal 
+ const openCommentModal = (type, index, event) => {
+  const buttonRect = event.currentTarget.getBoundingClientRect();
+  setCommentModalState({
+    isOpen: true,
+    targetType: type,
+    index: index,
+    comment: (type === 'requirement' ? requirements[index] : committedFunds[index])?.comments || '',
+    position: {
+      top: buttonRect.top + window.scrollY,
+      left: buttonRect.left + window.scrollX
+    }
+  });
+};
+  // Update comment in local state (no database save yet)
+  const updateComment = (newComment) => {
+    if (commentModalState.targetType === 'requirement') {
+      const updated = [...requirements];
+      updated[commentModalState.index].comments = newComment;
+      setRequirements(updated);
+    } else if (commentModalState.targetType === 'committed') {
+      const updated = [...committedFunds];
+      updated[commentModalState.index].comments = newComment;
+      setCommittedFunds(updated);
+    }
+  };
+
+  // Close comment modal
+  const closeCommentModal = () => {
+    setCommentModalState({
+      isOpen: false,
+      targetType: null,
+      index: null,
+      comment: '',
+      position: { top: 0, left: 0 }
+    });
+  };
 
   const [isSaving, setIsSaving] = useState(false);
   const [deletingIndex, setDeletingIndex] = useState(null);
@@ -226,11 +272,11 @@ const Tool2ProgramNeeds = () => {
                 PROJECTED BUDGET
               </th>
 
-              <th className="text-sm px-4 py-3 text-left w-[200px]">
+              <th className="text-sm px-4 py-3 text-left w-[100px]">
                 COMMENTS
               </th>
 
-              <th></th>
+              <th className="text-sm px-4 py-3 text-left"></th>
             </tr>
 
             <tr className="bg-gray-100 text-gray-700 text-sm">
@@ -302,22 +348,28 @@ const Tool2ProgramNeeds = () => {
 
                   {/* Comments */}
                   <td className="p-2">
-                    <input
-                      type="text"
-                      placeholder="Comments"
-                      value={req.comments}
-                      onChange={(e) =>
-                        handleRequirementChange(
-                          index,
-                          "comments",
-                          e.target.value
-                        )
-                      }
-                      className={`w-full border rounded px-2 py-1 text-xs ${
-                        isPendingDelete ? 'bg-gray-100 text-gray-500' : ''
-                      }`}
+                    <button
+                      onClick={(e) => openCommentModal('requirement', index, e)}
                       disabled={isPendingDelete || loading || isSaving}
-                    />
+                      className={`w-full flex items-center justify-between gap-1 px-3 py-2 rounded-lg border transition-all duration-200 ${
+                        req.comments && req.comments.trim() !== ''
+                          ? 'bg-green-50 border-green-300 hover:bg-green-100'
+                          : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                      } ${(isPendingDelete || loading || isSaving) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                    >
+                      <span className={`text-xs truncate flex-1 text-left ${
+                        req.comments && req.comments.trim() !== '' ? 'text-green-700' : 'text-gray-500'
+                      }`}>
+                        {req.comments && req.comments.trim() !== '' 
+                          ? req.comments.length > 8
+                            ? `${req.comments.substring(0, 11)}...` 
+                            : req.comments
+                          : 'Add comment...'}
+                      </span>
+                      <FiMessageSquare className={`flex-shrink-0 ${
+                        req.comments && req.comments.trim() !== '' ? 'text-green-600' : 'text-gray-400'
+                      }`} size={14} />
+                    </button>
                   </td>
 
                   {/* Delete */}
@@ -387,15 +439,30 @@ const Tool2ProgramNeeds = () => {
                   </td>
                 ))}
 
+                {/* Comments */}
                 <td className="p-2">
-                  <input
-                    type="text"
-                    placeholder="Comments"
-                    value={item.comments || ""}
-                    onChange={(e) => handleCommittedCommentChange(i, e.target.value)}
-                    className="w-full border rounded px-2 py-1 text-xs"
-                    disabled={loading}
-                  />
+                  <button
+                    onClick={(e) => openCommentModal('committed', i, e)}
+                    disabled={loading || isSaving}
+                    className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border transition-all duration-200 ${
+                      item.comments && item.comments.trim() !== ''
+                        ? 'bg-green-50 border-green-300 hover:bg-green-100'
+                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                    } ${(loading || isSaving) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  >
+                    <span className={`text-xs truncate flex-1 text-left ${
+                      item.comments && item.comments.trim() !== '' ? 'text-green-700' : 'text-gray-500'
+                    }`}>
+                      {item.comments && item.comments.trim() !== '' 
+                        ? item.comments.length > 8 
+                          ? `${item.comments.substring(0, 11)}...` 
+                          : item.comments
+                        : 'Add comment...'}
+                    </span>
+                    <FiMessageSquare className={`flex-shrink-0 ${
+                      item.comments && item.comments.trim() !== '' ? 'text-green-600' : 'text-gray-400'
+                    }`} size={14} />
+                  </button>
                 </td>
 
                 <td></td>
@@ -434,6 +501,15 @@ const Tool2ProgramNeeds = () => {
             </tr>
           </tbody>
         </table>
+
+        {/* Comment Modal */}
+        <CommentModal
+          isOpen={commentModalState.isOpen}
+          onClose={closeCommentModal}
+          onSave={updateComment}
+          initialComment={commentModalState.comment}
+          position={commentModalState.position}
+        />
       </div>
     </>
   );

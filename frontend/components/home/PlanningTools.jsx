@@ -19,7 +19,7 @@ const PlanningTools = ({ steps, step, setStep, isCompactView }) => {
   return (
     <div className="h-full transition-all duration-500 ease-in-out">
       <div 
-        className={`bg-white rounded-2xl p-6 shadow-lg sticky top-8 transition-all duration-500 ease-in-out overflow-hidden ${
+        className={`bg-white rounded-2xl px-6 pt-6 pb-2 shadow-lg sticky top-8 transition-all duration-500 ease-in-out overflow-hidden ${
           isCompactView ? 'w-[120px]' : 'w-[280px]'
         }`}
         style={{
@@ -96,29 +96,31 @@ const PlanningTools = ({ steps, step, setStep, isCompactView }) => {
         </div>
 
         {/* Pagination */}
-        {steps.length > toolsPerPage && (
-          <div 
-            className={`flex justify-center mt-4 transition-all duration-500 ease-in-out ${
-              isCompactView ? 'scale-90' : 'scale-100'
-            }`}
+      {steps.length > toolsPerPage && (
+        <div
+          className={`flex justify-center mt-4 transition-all duration-500 ease-in-out ${
+            isCompactView ? "scale-90" : "scale-100"
+          }`}
+        >
+          <button
+            onClick={() => {
+              if (page < totalPages - 1) {
+                setPage(page + 1); // go next
+              } else {
+                setPage(page - 1); // go back
+              }
+            }}
+            disabled={totalPages <= 1}
+            className="px-3 py-1 text-[#22864D] rounded disabled:text-gray-500 disabled:opacity-50 cursor-pointer transition-all duration-300 hover:scale-110"
           >
-            <button
-              onClick={() => setPage(page - 1)}
-              disabled={page === 0}
-              className="px-3 py-1 text-[#22864D] rounded disabled:text-gray-500 disabled:opacity-50 cursor-pointer transition-all duration-300 hover:scale-110"
-            >
-              <FiArrowLeftCircle className="w-5 h-5"/>
-            </button>
-
-            <button
-              onClick={() => setPage(page + 1)}
-              disabled={page === totalPages - 1}
-              className="px-3 py-1 text-[#22864D] rounded disabled:text-gray-500 disabled:opacity-50 cursor-pointer transition-all duration-300 hover:scale-110"
-            >
-              <FiArrowRightCircle className="w-5 h-5"/>
-            </button>
-          </div>
-        )}
+            {page < totalPages - 1 ? (
+              <FiArrowRightCircle className="w-8 h-8" />
+            ) : (
+              <FiArrowLeftCircle className="w-8 h-8" />
+            )}
+          </button>
+        </div>
+      )}
       </div>
     </div>
   );

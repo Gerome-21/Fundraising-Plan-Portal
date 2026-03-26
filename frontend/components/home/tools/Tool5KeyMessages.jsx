@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FiSave, FiPlus, FiTrash2 } from "react-icons/fi";
 import { useUser } from "../../../context/UserContext";
 import { useKeyMessages } from "../../../hooks/useKeyMessages";
+import KeyMessagesSkeleton from "../../Tool5Components/KeyMessagesSkeleton";
 
 // Configuration for better maintainability
 const SECTIONS = [
@@ -182,11 +183,7 @@ const Tool5KeyMessages = () => {
   };
 
  if (loading) {
-  return (
-    <div className="flex items-center justify-center py-20 text-gray-400 text-sm">
-      Loading key messages…
-    </div>
-  );
+  return  <KeyMessagesSkeleton/>;
 }
   
   return (

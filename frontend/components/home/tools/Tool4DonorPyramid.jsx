@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import usePotentialDonor from "../../../hooks/usePotentialDonor";
 import DonorPyramidSkeleton from "../../Tool4Components.jsx/DonorPyramidSkeleton";
-import { StatsCards } from "../../Tool2Components/StatsCards";
-import { HeatFilter } from "../../Tool2Components/HeatFilter";
-import { PyramidGrid } from "../../Tool2Components/PyramidGrid";
-import { DonorModal } from "../../Tool2Components/DonorModal";
-import { HEAT_CONFIG } from "../../Tool2Components/heatConfig";
+import { StatsCards } from "../../Tool4Components.jsx/StatsCards";
+import { HeatFilter } from "../../Tool4Components.jsx/HeatFilter";
+import { PyramidGrid } from "../../Tool4Components.jsx/PyramidGrid";
+import { DonorModal } from "../../Tool4Components.jsx/DonorModal";
 
 const Tool4DonorPyramid = () => {
   const { donors, loading, saving, addDonor, updateDonor, deleteDonor } = usePotentialDonor();

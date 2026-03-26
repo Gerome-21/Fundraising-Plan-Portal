@@ -10,7 +10,7 @@ const Dashboard = () => {
     { number: 1, title: "Self Assessment", icon: <FiHeart /> },
     { number: 2, title: "Program Needs List", icon: <FiList /> },
     { number: 3, title: "Gift Range Chart", icon: <FiGift /> },
-    { number: 4, title: "Potential Donor Pyramid", icon: <FiLayers /> },
+    { number: 4, title: "Potential Donor Pyramid", icon: <FiTriangle /> },
     { number: 5, title: "Key Messages and Communications", icon: <FiMessageSquare /> },
     { number: 6, title: "Fundraising Action Plan", icon: <FiClipboard /> },
     { number: 7, title: "Fundraising Policies Sentence Completion", icon: <FiFileText /> },

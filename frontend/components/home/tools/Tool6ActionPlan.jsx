@@ -1,129 +1,156 @@
-import React, { useState } from "react";
-import { FiPlus, FiTrash2, FiChevronDown, FiChevronRight, FiX, FiTrash } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
+import { FiPlus, FiTrash2, FiChevronDown, FiChevronRight, FiX, FiSave } from "react-icons/fi";
+import { MdChatBubble, MdCommentBank } from "react-icons/md";
+import FundingProspectsModal from "../../Tool6Components/FundingProspectsModal";
+import { useFundraisingActionPlan } from "../../../hooks/useFundrasingActionPlan";
+import { useUser } from "../../../context/UserContext";
+import toast from "react-hot-toast";
+import FundraisingActionPlanSkeleton from "../../Tool6Components/FundraisingActionPlanSkeleton";
 
 const Tool6ActionPlan = () => {
-  const [programs, setPrograms] = useState([
-    {
-      id: 1,
-      name: "",
-      strategies: [
-        {
-          id: 1,
-          name: "",
-          years: [
-            { year: "Year 1", expenses: "", revenue: "" },
-            { year: "Year 2", expenses: "", revenue: "" },
-            { year: "Year 3", expenses: "", revenue: "" },
-            { year: "Year 4", expenses: "", revenue: "" },
-            { year: "Year 5", expenses: "", revenue: "" }
-          ]
-        }
-      ],
-      expanded: true
+  const { user } = useUser();
+  const { 
+    programs, 
+    loading, 
+    initialLoading, 
+    saveAllData, 
+    loadData,
+    addProgram: addProgramLocal,
+    removeProgram: removeProgramLocal,
+    addStrategy: addStrategyLocal,
+    removeStrategy: removeStrategyLocal,
+    updateProgramName: updateProgramNameLocal,
+    updateStrategyName: updateStrategyNameLocal,
+    updateFundingProspects: updateFundingProspectsLocal,
+    updateYearValue: updateYearValueLocal,
+    toggleProgram: toggleProgramLocal,
+    setPrograms
+  } = useFundraisingActionPlan();
+  const [pendingDeletePrograms, setPendingDeletePrograms] = useState([]);
+  const [pendingDeleteStrategies, setPendingDeleteStrategies] = useState([]); 
+  
+  const [isSaving, setIsSaving] = useState(false);
+  const [prospectModal, setProspectModal] = useState({
+    isOpen: false,
+    programId: null,
+    strategyId: null,
+    comment: '',
+    position: { top: 0, left: 0 }
+  });
+
+  // Load data on mount
+  useEffect(() => {
+    if (user?.id) {
+      loadData();
     }
-  ]);
+  }, [user?.id]);
 
   const addProgram = () => {
-    const newId = programs.length + 1;
-    setPrograms([
-      ...programs,
-      {
-        id: newId,
-        name: ``,
-        strategies: [],
-        expanded: true
-      }
-    ]);
+    setPrograms(prev => addProgramLocal(prev));
   };
 
   const removeProgram = (programId) => {
-    setPrograms(programs.filter(p => p.id !== programId));
+    const program = programs.find(p => p.id === programId);
+    if (program && typeof program.id === 'string') {
+      setPendingDeletePrograms(prev => [...prev, programId]);
+    } else {
+      setPrograms(prev => removeProgramLocal(prev, programId));
+    }
   };
 
   const addStrategy = (programId) => {
-    setPrograms(programs.map(program => {
-      if (program.id === programId) {
-        const newStrategyId = program.strategies.length + 1;
-        return {
-          ...program,
-          strategies: [
-            ...program.strategies,
-            {
-              id: newStrategyId,
-              name: "",
-              years: [
-                { year: "Year 1", expenses: "", revenue: "" },
-                { year: "Year 2", expenses: "", revenue: "" },
-                { year: "Year 3", expenses: "", revenue: "" },
-                { year: "Year 4", expenses: "", revenue: "" },
-                { year: "Year 5", expenses: "", revenue: "" }
-              ]
-            }
-          ]
-        };
-      }
-      return program;
-    }));
+    setPrograms(prev => addStrategyLocal(prev, programId));
   };
 
   const removeStrategy = (programId, strategyId) => {
-    setPrograms(programs.map(program => {
-      if (program.id === programId) {
-        return {
-          ...program,
-          strategies: program.strategies.filter(s => s.id !== strategyId)
-        };
-      }
-      return program;
-    }));
+    const program = programs.find(p => p.id === programId);
+    const strategy = program?.strategies.find(s => s.id === strategyId);
+    if (strategy && typeof strategy.id === 'string') {
+      setPendingDeleteStrategies(prev => [...prev, { programId, strategyId }]);
+    } else {
+      setPrograms(prev => removeStrategyLocal(prev, programId, strategyId));
+    }
   };
 
   const updateProgramName = (programId, name) => {
-    setPrograms(programs.map(program => 
-      program.id === programId ? { ...program, name } : program
-    ));
+    setPrograms(prev => updateProgramNameLocal(prev, programId, name));
   };
 
   const updateStrategyName = (programId, strategyId, name) => {
-    setPrograms(programs.map(program => {
-      if (program.id === programId) {
-        return {
-          ...program,
-          strategies: program.strategies.map(strategy =>
-            strategy.id === strategyId ? { ...strategy, name } : strategy
-          )
-        };
-      }
-      return program;
-    }));
+    setPrograms(prev => updateStrategyNameLocal(prev, programId, strategyId, name));
   };
 
   const updateYearValue = (programId, strategyId, yearIndex, field, value) => {
-    setPrograms(programs.map(program => {
-      if (program.id === programId) {
-        return {
-          ...program,
-          strategies: program.strategies.map(strategy => {
-            if (strategy.id === strategyId) {
-              const updatedYears = [...strategy.years];
-              updatedYears[yearIndex] = {
-                ...updatedYears[yearIndex],
-                [field]: value === "" ? "" : parseFloat(value) || 0
-              };
-              return { ...strategy, years: updatedYears };
-            }
-            return strategy;
-          })
-        };
-      }
-      return program;
-    }));
+    setPrograms(prev => updateYearValueLocal(prev, programId, strategyId, yearIndex, field, value));
   };
 
   const toggleProgram = (programId) => {
-    setPrograms(programs.map(program =>
-      program.id === programId ? { ...program, expanded: !program.expanded } : program
-    ));
+    setPrograms(prev => toggleProgramLocal(prev, programId));
+  };
+
+  // Open funding prospects modal
+  const openProspectModal = (programId, strategyId, event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const program = programs.find(p => p.id === programId);
+    const strategy = program?.strategies.find(s => s.id === strategyId);
+
+    setProspectModal({
+      isOpen: true,
+      programId,
+      strategyId,
+      comment: strategy?.fundingProspects || '',
+      position: {
+        top: rect.top + window.scrollY,
+        left: rect.left + window.scrollX + 24
+      }
+    });
+  };
+
+  // Save funding prospects
+  const saveProspect = (newComment) => {
+    setPrograms(prev => updateFundingProspectsLocal(prev, prospectModal.programId, prospectModal.strategyId, newComment));
+  };
+
+  const closeProspectModal = () => {
+    setProspectModal({ isOpen: false, programId: null, strategyId: null, comment: '', position: { top: 0, left: 0 } });
+  };
+
+  // Save all data to database
+  const handleSaveAll = async () => {
+    if (!user) {
+      toast.error('Please log in to save data');
+      return;
+    }
+
+    const hasValidPrograms = programs.some(p => p.name.trim() !== '');
+    if (!hasValidPrograms) {
+      toast.error('Please add at least one program with a name');
+      return;
+    }
+
+    setIsSaving(true);
+
+    // Filter out pending deletes before saving
+    const activePrograms = programs
+      .filter(p => !pendingDeletePrograms.includes(p.id))
+      .map(p => ({
+        ...p,
+        strategies: p.strategies.filter(
+          s => !pendingDeleteStrategies.some(
+            pd => pd.programId === p.id && pd.strategyId === s.id
+          )
+        )
+      }));
+
+    const success = await saveAllData(activePrograms);
+    if (success) {
+      // Update local state directly — no reload
+      setPrograms(activePrograms);
+      setPendingDeletePrograms([]);
+      setPendingDeleteStrategies([]);
+    }
+
+    setIsSaving(false);
   };
 
   // Calculate totals
@@ -154,11 +181,27 @@ const Tool6ActionPlan = () => {
 
   const years = ["Year 1", "Year 2", "Year 3", "Year 4", "Year 5"];
 
+  if (initialLoading) {
+    return <FundraisingActionPlanSkeleton/>;
+  }
+
   return (
     <>
-      <h2 className="text-2xl font-bold text-[#001033] mb-4">
-        Tool 6: Fundraising Action Plan
-      </h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold text-[#001033]">
+          Tool 6: Fundraising Action Plan
+        </h2>
+        <button
+          onClick={handleSaveAll}
+          disabled={loading || isSaving || !user}
+          className={`flex items-center gap-2 px-4 py-2 bg-[#22864D] text-white rounded-lg hover:bg-[#1a6b3c] transition-colors ${
+            (loading || isSaving || !user) ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+        >
+          <FiSave />
+          {isSaving ? 'Saving...' : 'Save Changes'}
+        </button>
+      </div>
 
       <section className="mb-6">
         <h3 className="font-semibold text-[#001033] mb-2">Objectives</h3>
@@ -174,7 +217,8 @@ const Tool6ActionPlan = () => {
       {/* Add Program Button */}
       <button
         onClick={addProgram}
-        className="mb-4 flex items-center gap-2 px-4 py-2 bg-[#22864D] text-white rounded-lg hover:bg-[#22864D]/90 transition-all"
+        disabled={loading || isSaving}
+        className="mb-4 flex items-center gap-2 px-4 py-2 bg-[#22864D] text-white rounded-lg hover:bg-[#22864D]/90 transition-all disabled:opacity-50"
       >
         <FiPlus /> Add Program
       </button>
@@ -190,11 +234,10 @@ const Tool6ActionPlan = () => {
               <th colSpan="2" className="px-4 py-3 text-center">Year 3</th>
               <th colSpan="2" className="px-4 py-3 text-center">Year 4</th>
               <th colSpan="2" className="px-4 py-3 text-center">Year 5</th>
-              <th className="px-4 py-3 text-center w-[60px]"></th>
+              <th></th>
             </tr>
             <tr className="bg-gray-200 text-gray-700 text-xs">
               <th></th>
-              {/* <th></th> */}
               <th className="px-3 py-2">Expenses</th>
               <th className="px-3 py-2">Revenue</th>
               <th className="px-3 py-2">Expenses</th>
@@ -212,13 +255,16 @@ const Tool6ActionPlan = () => {
             {programs.map((program) => (
               <React.Fragment key={program.id}>
                 {/* Program Row */}
-                <tr className="bg-gray-100 border-t ">
+                <tr className={`bg-gray-100 border-t ${
+                  pendingDeletePrograms.includes(program.id) ? 'bg-red-100' : ''
+                }`}>
                   <td colSpan="13" className="px-4 py-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-center">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => toggleProgram(program.id)}
                           className="text-gray-600 hover:text-[#22864D]"
+                          disabled={loading || isSaving}
                         >
                           {program.expanded ? <FiChevronDown size={16} /> : <FiChevronRight size={16} />}
                         </button>
@@ -226,36 +272,65 @@ const Tool6ActionPlan = () => {
                           type="text"
                           value={program.name}
                           onChange={(e) => updateProgramName(program.id, e.target.value)}
-                          className="font-semibold bg-transparent border-b border-transparent hover:border-gray-300 focus:border-[#22864D] outline-none px-1"
+                          className="font-semibold bg-transparent border-b border-transparent hover:border-gray-300 focus:border-[#22864D] outline-none px-1 truncate"
                           placeholder="Enter Program Name"
+                          disabled={loading || isSaving}
                         />
                       </div>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => removeProgram(program.id)}
-                          className="text-red-500 hover:text-red-700"
+                          className={`hover:bg-gray-200 ${
+                            pendingDeletePrograms.includes(program.id)
+                              ? 'text-gray-400 cursor-not-allowed'
+                              : 'text-red-500 hover:text-red-700'
+                          }`}
+                          disabled={loading || isSaving || pendingDeletePrograms.includes(program.id)}
                         >
                           <FiTrash2 size={14} />
                         </button>
                       </div>
                     </div>
-                  </td>
+                   </td>
                 </tr>
 
                 {/* Strategies Rows */}
-                {program.expanded && program.strategies.map((strategy) => (
-                  <tr key={strategy.id} className="border-t hover:bg-gray-50">
+                {program.expanded && program.strategies.map((strategy) => {
+                  const isPendingDelete = pendingDeleteStrategies.some(
+                    pd => pd.programId === program.id && pd.strategyId === strategy.id
+                  );
+
+                  return (
+                    <tr key={strategy.id} className={`border-t ${
+                      isPendingDelete ? 'bg-red-100 text-gray-400 line-through' : 'hover:bg-gray-50'
+                    }`}>
                     <td className="px-4 py-2">
-                      <div className="flex items-center gap-2">
+                      <div className="relative flex items-center">
                         <input
                           type="text"
                           placeholder="Strategy name"
                           value={strategy.name}
                           onChange={(e) => updateStrategyName(program.id, strategy.id, e.target.value)}
-                          className="w-full border rounded px-2 py-1 text-xs focus:border-[#22864D] outline-none"
+                          className="w-full border rounded px-2 py-1 pr-7 text-xs focus:border-[#22864D] outline-none"
+                          disabled={loading || isSaving}
                         />
+                        <button
+                          onClick={(e) => openProspectModal(program.id, strategy.id, e)}
+                          className="absolute right-1.5 top-1/2 -translate-y-1/2 transition-colors duration-200"
+                          title={strategy.fundingProspects || 'Add funding prospects'}
+                          disabled={loading || isSaving}
+                        >
+                          <MdCommentBank
+                            size={13}
+                            className={
+                              strategy.fundingProspects?.trim()
+                                ? 'text-green-500'
+                                : 'text-gray-400 hover:text-gray-500'
+                            }
+                          />
+                        </button>
                       </div>
-                    </td>
+                     </td>
                     {strategy.years.map((year, idx) => (
                       <React.Fragment key={idx}>
                         <td className="px-2 py-2">
@@ -265,8 +340,9 @@ const Tool6ActionPlan = () => {
                             value={year.expenses}
                             onChange={(e) => updateYearValue(program.id, strategy.id, idx, "expenses", e.target.value)}
                             className="w-full border rounded px-2 py-1 text-xs text-right focus:border-[#22864D] outline-none"
+                            disabled={loading || isSaving}
                           />
-                        </td>
+                         </td>
                         <td className="px-2 py-2">
                           <input
                             type="number"
@@ -274,33 +350,36 @@ const Tool6ActionPlan = () => {
                             value={year.revenue}
                             onChange={(e) => updateYearValue(program.id, strategy.id, idx, "revenue", e.target.value)}
                             className="w-full border rounded px-2 py-1 text-xs text-right focus:border-[#22864D] outline-none"
+                            disabled={loading || isSaving}
                           />
-                        </td>
+                         </td>
                       </React.Fragment>
                     ))}
                     <td className="px-2 py-2">
                       <button
                         onClick={() => removeStrategy(program.id, strategy.id)}
-                        className="text-red-700 hover:text-red-700"
+                        className={isPendingDelete ? 'text-gray-400 cursor-not-allowed' : 'text-red-700 cursor-pointer'}
+                        disabled={loading || isSaving || isPendingDelete}
                       >
                         <FiX size={14} />
                       </button>
                     </td>
                   </tr>
-                  
-                ))}
+                  );
+                })}
                 {program.expanded && (
-                <tr>
-                  <td colSpan="13" className="px-4 py-3">
-                    <button
-                      onClick={() => addStrategy(program.id)}
-                      className="text-xs text-[#22864D] hover:underline flex items-center gap-1"
-                    >
-                      <FiPlus size={12} /> Add Strategy
-                    </button>
-                  </td>
-                </tr>
-              )}
+                  <tr>
+                    <td colSpan="13" className="px-4 py-3">
+                      <button
+                        onClick={() => addStrategy(program.id)}
+                        className="text-xs text-[#22864D] hover:underline flex items-center gap-1"
+                        disabled={loading || isSaving}
+                      >
+                        <FiPlus size={12} /> Add Strategy
+                      </button>
+                    </td>
+                  </tr>
+                )}
 
                 {/* No strategies message */}
                 {program.expanded && program.strategies.length === 0 && (
@@ -327,13 +406,13 @@ const Tool6ActionPlan = () => {
           {programs.length > 0 && (
             <tfoot className="bg-gray-100 font-bold border-t-2 border-gray-300">
               <tr>
-                <td colSpan="-1" className="px-4 py-3 text-right">TOTAL</td>
+                <td className="px-4 py-3 text-right">TOTAL</td>
                 {Array(5).fill().map((_, idx) => (
                   <React.Fragment key={idx}>
-                    <td className="px-4 py-3 text-right text-[#22864D]">
+                    <td className="px-4 py-3 text-right text-black">
                       ₱ {formatNumber(totals.expenses[idx])}
                     </td>
-                    <td className="px-4 py-3 text-right text-[#22864D]">
+                    <td className="px-4 py-3 text-right text-black">
                       ₱ {formatNumber(totals.revenue[idx])}
                     </td>
                   </React.Fragment>
@@ -345,6 +424,14 @@ const Tool6ActionPlan = () => {
         </table>
       </div>
 
+      {/* Funding Prospects Modal */}
+      <FundingProspectsModal
+        isOpen={prospectModal.isOpen}
+        onClose={closeProspectModal}
+        onSave={saveProspect}
+        initialComment={prospectModal.comment}
+        position={prospectModal.position}
+      />
     </>
   );
 };
