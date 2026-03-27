@@ -37,8 +37,8 @@ const OrganizationalStructure = ({
       const smoothEdges = chartData.edges.map(edge => ({
         ...edge,
         type: 'smoothstep',
-        animated: true,
-        style: { stroke: '#22864D', strokeWidth: 2 }
+        animated: false,
+        style: { stroke: '#6ea686', strokeWidth: 2 }
       }));
 
       setDisplayEdges(smoothEdges);
@@ -78,8 +78,8 @@ const OrganizationalStructure = ({
         zoomOnScroll={true}
       >
         <MiniMap
-          nodeStrokeWidth={3}
-          nodeColor={(node) => node.type === 'input' ? '#22864D' : '#a2d5b1'}
+          nodeStrokeWidth={2}
+          nodeColor={(node) => node.type === 'input' ? '#22864D' : '#2ac871'}
         />
         <Controls />
         <Background color="#aaa" gap={16} />
@@ -133,59 +133,12 @@ const OrganizationalStructure = ({
               <FiEdit2 className="w-4 h-4" />
               Edit Interactive Chart
             </button>
-            <button
-              onClick={() => {
-                if (window.confirm('This will replace your interactive chart. Continue?')) {
-                  handleDeleteChart();
-                }
-              }}
-              className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-all"
-            >
-              <FiTrash2 className="w-4 h-4" />
-              Delete Chart
-            </button>
           </>
         ) : (
           <>
-            <button
-              onClick={() => setShowBuilder(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#22864D] text-white rounded-lg text-sm font-medium hover:bg-[#1a6b3c] transition-all"
-            >
-              <FiGitBranch className="w-4 h-4" />
-              Create Interactive Chart
-            </button>
-            
-            <div className="relative">
-              <label
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
-                  !hasInteractiveChart
-                    ? 'bg-gray-500 text-white hover:bg-gray-600'
-                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                <FiImage className="w-4 h-4" />
-                Upload Image
-                <input
-                  type="file"
-                  className="hidden"
-                  accept=".png,.jpg,.jpeg"
-                  onChange={handleUploadChart}
-                  disabled={uploading || hasInteractiveChart}
-                />
-              </label>
-            </div>
           </>
         )}
       </div>
-
-      {/* Warning message */}
-      {hasInteractiveChart && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-xs text-green-700">
-            ✅ Interactive chart is active. You can edit or delete it above.
-          </p>
-        </div>
-      )}
 
       {/* Display Interactive Chart */}
       {hasInteractiveChart && !showBuilder && (

@@ -95,10 +95,10 @@ const OrgChartBuilder = ({ onSave, onClose, initialData }) => {
   };
 
   const handleSave = async () => {
-    if (nodes.length === 0) {
-      toast.error('Please add at least one node');
-      return;
-    }
+    // if (nodes.length === 0) {
+    //   toast.error('Please add at least one node');
+    //   return;
+    // }
 
     setIsSaving(true);
     const chartData = {
@@ -221,7 +221,7 @@ const OrgChartBuilder = ({ onSave, onClose, initialData }) => {
             attributionPosition="bottom-right"
           >
             <MiniMap 
-              nodeStrokeWidth={3}
+              nodeStrokeWidth={2}
               nodeColor={(node) => {
                 if (node.type === 'input') return '#22864D';
                 return '#a2d5b1';
