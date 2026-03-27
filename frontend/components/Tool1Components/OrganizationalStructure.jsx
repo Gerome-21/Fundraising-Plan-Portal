@@ -1,7 +1,120 @@
-import React from "react";
-import { FiImage, FiRepeat, FiTrash2 } from "react-icons/fi";
+import React, { useState, useCallback, useEffect } from "react";
+import { FiImage, FiRepeat, FiTrash2, FiGitBranch, FiEdit2, FiMaximize2 } from "react-icons/fi";
+import ReactFlow, {
+  addEdge,
+  MiniMap,
+  Controls,
+  Background,
+  useNodesState,
+  useEdgesState,
+  Panel,
+} from 'reactflow';
+import 'reactflow/dist/style.css';
+import OrgChartBuilder from "./OrgChartBuilder";
 
-const OrganizationalStructure = ({ chart, uploading, handleUploadChart, handleDeleteChart }) => {
+const OrganizationalStructure = ({ 
+  chart, 
+  uploading, 
+  handleUploadChart, 
+  handleDeleteChart, 
+  handleSaveChartData,
+  chartData 
+}) => {
+  const [showBuilder, setShowBuilder] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Initialize React Flow nodes and edges for display
+  const [displayNodes, setDisplayNodes, onNodesChange] = useNodesState(chartData?.nodes || []);
+  const [displayEdges, setDisplayEdges, onEdgesChange] = useEdgesState(chartData?.edges || []);
+  const [reactFlowInstance, setReactFlowInstance] = useState(null);
+
+  const hasInteractiveChart = chartData && (chartData.nodes?.length > 0);
+
+  useEffect(() => {
+    if (chartData?.nodes) setDisplayNodes(chartData.nodes);
+
+    if (chartData?.edges) {
+      const smoothEdges = chartData.edges.map(edge => ({
+        ...edge,
+        type: 'smoothstep',
+        animated: true,
+        style: { stroke: '#22864D', strokeWidth: 2 }
+      }));
+
+      setDisplayEdges(smoothEdges);
+    }
+  }, [chartData]);
+
+  
+  const handleSaveBuilderData = async (data) => {
+    await handleSaveChartData(data);
+    setShowBuilder(false);
+  };
+
+  const handleEditChart = () => {
+    setShowBuilder(true);
+  };
+
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
+  // Display React Flow Chart
+  const renderFlowChart = (isFullscreenMode = false) => (
+  <div className={`${isFullscreenMode ? 'fixed inset-0 z-50 bg-white' : 'w-full'}`}>
+    <div className={`relative bg-gray-50 rounded-lg overflow-hidden border border-gray-200 ${isFullscreenMode ? 'h-screen' : 'h-[500px]'}`}>
+      <ReactFlow
+        nodes={displayNodes}
+        edges={displayEdges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onInit={setReactFlowInstance}
+        fitView
+        attributionPosition="bottom-right"
+        nodesDraggable={false}
+        nodesConnectable={false}
+        elementsSelectable={false}
+        panOnDrag={true}
+        zoomOnScroll={true}
+      >
+        <MiniMap
+          nodeStrokeWidth={3}
+          nodeColor={(node) => node.type === 'input' ? '#22864D' : '#a2d5b1'}
+        />
+        <Controls />
+        <Background color="#aaa" gap={16} />
+        <Panel position="top-left">
+          <div className="bg-white/90 backdrop-blur rounded-lg px-3 py-1.5 text-xs text-gray-500 shadow">
+            {displayNodes.length} positions | {displayEdges.length} connections
+          </div>
+        </Panel>
+      </ReactFlow>
+
+      {!isFullscreenMode && (
+        <button
+          onClick={toggleFullscreen}
+          className="absolute top-2 right-2 z-10 bg-white/80 hover:bg-white p-2 rounded-lg shadow-md transition"
+          title="View fullscreen"
+        >
+          <FiMaximize2 className="w-4 h-4 text-gray-600" />
+        </button>
+      )}
+
+      {isFullscreenMode && (
+        <button
+          onClick={toggleFullscreen}
+          className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white p-2 rounded-lg shadow-md transition"
+          title="Exit fullscreen"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+    </div>
+  </div>
+);
+
   return (
     <section className="mb-8 pt-8 border-t-1 border-gray-400">
       <h3 className="font-bold text-lg mb-4">Organizational Structure</h3>
@@ -9,30 +122,92 @@ const OrganizationalStructure = ({ chart, uploading, handleUploadChart, handleDe
         Provide a diagram of the current organizational chart, paying particular attention to the resource mobilization team and its relationships with other units. For smaller organizations, provide alternative structures that assume the responsibilities of resource mobilization.
       </p>
 
-      {!chart ? (
-        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-8 transition-all hover:border-[#22864D] group">
-          <div className="flex flex-col items-center justify-center text-center">
-            <div className="w-16 h-16 bg-[#22864D]/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-[#22864D]/20 transition-all">
-              <FiImage className="w-8 h-8 text-[#22864D]" />
+      {/* Action Buttons */}
+      <div className="flex gap-3 mb-4">
+        {hasInteractiveChart ? (
+          <>
+            <button
+              onClick={handleEditChart}
+              className="flex items-center gap-2 px-4 py-2 bg-[#22864D] text-white rounded-lg text-sm font-medium hover:bg-[#1a6b3c] transition-all"
+            >
+              <FiEdit2 className="w-4 h-4" />
+              Edit Interactive Chart
+            </button>
+            <button
+              onClick={() => {
+                if (window.confirm('This will replace your interactive chart. Continue?')) {
+                  handleDeleteChart();
+                }
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-all"
+            >
+              <FiTrash2 className="w-4 h-4" />
+              Delete Chart
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => setShowBuilder(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#22864D] text-white rounded-lg text-sm font-medium hover:bg-[#1a6b3c] transition-all"
+            >
+              <FiGitBranch className="w-4 h-4" />
+              Create Interactive Chart
+            </button>
+            
+            <div className="relative">
+              <label
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                  !hasInteractiveChart
+                    ? 'bg-gray-500 text-white hover:bg-gray-600'
+                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                <FiImage className="w-4 h-4" />
+                Upload Image
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".png,.jpg,.jpeg"
+                  onChange={handleUploadChart}
+                  disabled={uploading || hasInteractiveChart}
+                />
+              </label>
             </div>
-            <h4 className="font-semibold text-gray-700 mb-2">Upload Organization Chart</h4>
-            <p className="text-sm text-gray-500 mb-4">Drag and drop or click to upload (PNG, JPG, JPEG)</p>
-            <label className="cursor-pointer">
-              <span className="bg-[#22864D] hover:bg-[#22864D]/90 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-all inline-block shadow-md hover:shadow-lg">
-                {uploading ? 'Uploading...' : 'Choose File'}
-              </span>
-              <input
-                type="file"
-                className="hidden"
-                accept=".png,.jpg,.jpeg,.pdf"
-                onChange={handleUploadChart}
-                disabled={uploading}
-              />
-            </label>
-            <div className="mt-4 text-xs text-gray-400">Max file size: 10MB</div>
-          </div>
+          </>
+        )}
+      </div>
+
+      {/* Warning message */}
+      {hasInteractiveChart && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-xs text-green-700">
+            ✅ Interactive chart is active. You can edit or delete it above.
+          </p>
         </div>
-      ) : (
+      )}
+
+      {/* Display Interactive Chart */}
+      {hasInteractiveChart && !showBuilder && (
+        <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+          <div className="flex justify-between items-center mb-3">
+            <h4 className="font-semibold text-gray-700">Organization Chart</h4>
+            <div className="flex gap-2">
+              <button
+                onClick={handleEditChart}
+                className="text-[#22864D] hover:text-[#1a6b3c] text-sm flex items-center gap-1"
+              >
+                <FiEdit2 size={14} />
+                Edit
+              </button>
+            </div>
+          </div>
+          {renderFlowChart()}
+        </div>
+      )}
+
+      {/* Display Uploaded Image */}
+      {!hasInteractiveChart && chart && (
         <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
           <div className="flex flex-col items-center">
             <div className="relative w-full max-w-2xl mb-4 bg-gray-50 rounded-lg overflow-hidden">
@@ -44,15 +219,15 @@ const OrganizationalStructure = ({ chart, uploading, handleUploadChart, handleDe
             </div>
 
             <div className="flex gap-3">
-              <label>
-                <span className="bg-white text-green-500 hover:bg-gray-200 px-5 py-2.5 rounded-lg text-sm font-medium transition-all inline-flex items-center gap-2 shadow-md hover:shadow-lg cursor-pointer">
+              <label className="cursor-pointer">
+                <span className="bg-white text-green-500 hover:bg-gray-200 px-5 py-2.5 rounded-lg text-sm font-medium transition-all inline-flex items-center gap-2 shadow-md hover:shadow-lg">
                   <FiRepeat />
                   Replace
                 </span>
                 <input
                   type="file"
                   className="hidden"
-                  accept=".png,.jpg,.jpeg,.pdf"
+                  accept=".png,.jpg,.jpeg"
                   onChange={handleUploadChart}
                   disabled={uploading}
                 />
@@ -60,7 +235,7 @@ const OrganizationalStructure = ({ chart, uploading, handleUploadChart, handleDe
 
               <button
                 onClick={handleDeleteChart}
-                className="bg-gray-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-all inline-flex items-center gap-2 shadow-md hover:shadow-lg cursor-pointer"
+                className="bg-gray-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-all inline-flex items-center gap-2 shadow-md hover:shadow-lg"
               >
                 <FiTrash2 className="w-4 h-4" />
                 Delete
@@ -80,6 +255,75 @@ const OrganizationalStructure = ({ chart, uploading, handleUploadChart, handleDe
             )}
           </div>
         </div>
+      )}
+
+      {/* Empty State - No Chart */}
+      {!hasInteractiveChart && !chart && (
+        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-8 transition-all hover:border-[#22864D] group">
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 bg-[#22864D]/10 rounded-full flex items-center justify-center mb-4 group-hover:bg-[#22864D]/20 transition-all">
+              <FiGitBranch className="w-8 h-8 text-[#22864D]" />
+            </div>
+            <h4 className="font-semibold text-gray-700 mb-2">No Organization Chart Yet</h4>
+            <p className="text-sm text-gray-500 mb-4">
+              Create an interactive chart or upload an image
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowBuilder(true)}
+                className="bg-[#22864D] hover:bg-[#22864D]/90 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-all inline-flex items-center gap-2 shadow-md hover:shadow-lg"
+              >
+                <FiGitBranch />
+                Create Chart
+              </button>
+              <label className="cursor-pointer">
+                <span className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-all inline-flex items-center gap-2 shadow-md hover:shadow-lg">
+                  <FiImage />
+                  Upload Image
+                </span>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".png,.jpg,.jpeg"
+                  onChange={handleUploadChart}
+                  disabled={uploading}
+                />
+              </label>
+            </div>
+            <div className="mt-4 text-xs text-gray-400">Max file size: 10MB</div>
+          </div>
+        </div>
+      )}
+
+      {/* Fullscreen Modal */}
+      {isFullscreen && hasInteractiveChart && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full h-[90vh] flex flex-col overflow-hidden">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-bold text-[#001033]">Organization Chart - Fullscreen</h3>
+              <button
+                onClick={toggleFullscreen}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex-1">
+              {renderFlowChart(true)}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chart Builder Modal */}
+      {showBuilder && (
+        <OrgChartBuilder
+          onSave={handleSaveBuilderData}
+          onClose={() => setShowBuilder(false)}
+          initialData={chartData}
+        />
       )}
     </section>
   );

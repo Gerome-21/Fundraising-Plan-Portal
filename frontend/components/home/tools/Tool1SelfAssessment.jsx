@@ -10,12 +10,14 @@ const Tool1SelfAssessment = () => {
     loading,
     uploading,
     chart,
+    chartData,
     swotData,
     handleSwotChange,
     handleSaveSwot,
     handleUploadChart,
-    handleDeleteChart
-  } = useSelfAssessment();
+    handleDeleteChart,
+    handleSaveChartData
+} = useSelfAssessment();
   return (
     <>
       <h2 className="text-2xl font-bold text-[#121212] mb-4">
@@ -109,8 +111,10 @@ const Tool1SelfAssessment = () => {
       <OrganizationalStructure
         chart={chart}
         uploading={uploading}
+        chartData={chartData}
         handleUploadChart={handleUploadChart}
         handleDeleteChart={handleDeleteChart}
+        handleSaveChartData={handleSaveChartData}
       />
     </>
   );

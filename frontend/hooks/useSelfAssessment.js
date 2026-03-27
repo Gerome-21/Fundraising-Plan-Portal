@@ -8,6 +8,7 @@ export const useSelfAssessment = () => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [chart, setChart] = useState(null);
+  const [chartData, setChartData] = useState(null);
   const [swotData, setSwotData] = useState({
     strengths: '',
     weaknesses: '',
@@ -64,6 +65,28 @@ export const useSelfAssessment = () => {
     };
 
     loadChart();
+  }, [user]);
+
+  // Load chart data from org_charts table
+  useEffect(() => {
+    const loadChartData = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('org_charts')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!error && data) {
+        setChartData({
+          nodes: data.nodes,
+          edges: data.edges
+        });
+      }
+    };
+
+    loadChartData();
   }, [user]);
 
   const handleSwotChange = (e) => {
@@ -217,14 +240,67 @@ export const useSelfAssessment = () => {
     }
   };
 
+  // Add function to save chart data
+  const handleSaveChartData = async (data) => {
+    if (!user) {
+      toast.error('You must be logged in to save');
+      return false;
+    }
+
+    setLoading(true);
+    try {
+      const { data: existingData, error: fetchError } = await supabase
+        .from('org_charts')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      let result;
+      if (existingData) {
+        result = await supabase
+          .from('org_charts')
+          .update({
+            name: 'Organization Chart',
+            nodes: data.nodes,
+            edges: data.edges,
+            updated_at: new Date()
+          })
+          .eq('user_id', user.id);
+      } else {
+        result = await supabase
+          .from('org_charts')
+          .insert([{
+            user_id: user.id,
+            name: 'Organization Chart',
+            nodes: data.nodes,
+            edges: data.edges
+          }]);
+      }
+
+      if (result.error) throw result.error;
+
+      setChartData(data);
+      toast.success('Organization chart saved!');
+      return true;
+    } catch (error) {
+      console.error('Error saving chart:', error);
+      toast.error('Failed to save chart');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     uploading,
     chart,
+    chartData,
     swotData,
     handleSwotChange,
     handleSaveSwot,
     handleUploadChart,
-    handleDeleteChart
+    handleDeleteChart,
+    handleSaveChartData
   };
 };
