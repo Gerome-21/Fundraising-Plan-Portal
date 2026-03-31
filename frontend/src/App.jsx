@@ -5,7 +5,7 @@ import { UserProvider } from '../context/UserContext';
 import Layout from '../components/Layout';
 import Dashboard from '../pages/Dashboard';
 import ProtectedRoute from '../routes/ProtectedRoute';
-import Homepage from '../pages/Homepage';
+import Homepage from '../components/_archive/Homepage';
 import PreliminaryForm from '../pages/OnboardingModal';
 
 const App = () => {
@@ -45,7 +45,7 @@ const App = () => {
               <Layout/>
             </ProtectedRoute>
           }>
-            <Route path='/dashboard' element={<Dashboard/>}/> 
+            <Route path='/form' element={<Dashboard/>}/> 
             <Route path='/plan' element={<div>Plan Page (Coming Soon)</div>}/> 
             <Route path='/report' element={<div>Report Page (Coming Soon)</div>}/> 
           </Route>

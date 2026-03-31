@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FiClipboard, FiFileText, FiGift, FiHeart, FiLayers, FiList, FiMessageSquare, FiTriangle } from "react-icons/fi";
 import PlanningContent from "../components/home/PlanningContent";
 import PlanningTools from "../components/home/PlanningTools";
+import { MdInsights } from "react-icons/md";
 
 const Dashboard = () => {
   const [step, setStep] = useState(1);
@@ -14,10 +15,11 @@ const Dashboard = () => {
     { number: 5, title: "Key Messages and Communications", icon: <FiMessageSquare /> },
     { number: 6, title: "Fundraising Action Plan", icon: <FiClipboard /> },
     { number: 7, title: "Fundraising Policies Sentence Completion", icon: <FiFileText /> },
+    { number: 8, title: "Plan Summary and Insights", icon: <MdInsights /> },
   ];
 
   // Define which tools should trigger compact view
-  const compactViewTools = [2, 4, 6];
+  const compactViewTools = [2, 4, 6, 8];
   const isCompactView = compactViewTools.includes(step);
 
   return (

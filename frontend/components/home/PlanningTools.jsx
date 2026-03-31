@@ -3,7 +3,7 @@ import { FiArrowLeftCircle, FiArrowRightCircle } from "react-icons/fi";
 
 const PlanningTools = ({ steps, step, setStep, isCompactView }) => {
 
-  const toolsPerPage = 4;
+  const toolsPerPage = 3;
   const [page, setPage] = useState(0);
   
   useEffect(() => {
@@ -98,26 +98,24 @@ const PlanningTools = ({ steps, step, setStep, isCompactView }) => {
         {/* Pagination */}
       {steps.length > toolsPerPage && (
         <div
-          className={`flex justify-center mt-4 transition-all duration-500 ease-in-out ${
+          className={`flex justify-center items-center gap-2 mt-4 transition-all duration-500 ease-in-out ${
             isCompactView ? "scale-90" : "scale-100"
           }`}
         >
           <button
-            onClick={() => {
-              if (page < totalPages - 1) {
-                setPage(page + 1); // go next
-              } else {
-                setPage(page - 1); // go back
-              }
-            }}
-            disabled={totalPages <= 1}
-            className="px-3 py-1 text-[#22864D] rounded disabled:text-gray-500 disabled:opacity-50 cursor-pointer transition-all duration-300 hover:scale-110"
+            onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+            disabled={page === 0}
+            className="px-3 py-1 text-[#22864D] rounded disabled:text-gray-400 disabled:opacity-50 cursor-pointer transition-all duration-300 hover:scale-110"
           >
-            {page < totalPages - 1 ? (
-              <FiArrowRightCircle className="w-8 h-8" />
-            ) : (
-              <FiArrowLeftCircle className="w-8 h-8" />
-            )}
+            <FiArrowLeftCircle className="w-8 h-8" />
+          </button>
+
+          <button
+            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
+            disabled={page === totalPages - 1}
+            className="px-3 py-1 text-[#22864D] rounded disabled:text-gray-400 disabled:opacity-50 cursor-pointer transition-all duration-300 hover:scale-110"
+          >
+            <FiArrowRightCircle className="w-8 h-8" />
           </button>
         </div>
       )}

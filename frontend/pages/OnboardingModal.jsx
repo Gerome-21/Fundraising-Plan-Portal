@@ -121,17 +121,17 @@ const PreliminaryForm = () => {
     const success = await login(userData.organization_name, userData.user_name);
     if (success) {
       setShowOnboarding(false);
-      navigate('/dashboard');
+      navigate('/form');
     }
   };
 
   const handleSkip = () => {
     setShowOnboarding(false);
-    navigate('/dashboard');
+    navigate('/form');
   };
 
   if (user && !showOnboarding) {
-    navigate('/dashboard');
+    navigate('/form');
     return null;
   }
 

@@ -7,6 +7,7 @@ import Tool4DonorPyramid from "./tools/Tool4DonorPyramid";
 import Tool5KeyMessages from "./tools/Tool5KeyMessages";
 import Tool6ActionPlan from "./tools/Tool6ActionPlan";
 import Tool7Policies from "./tools/Tool7Policies";
+import Overview from "./tools/Overview";
 
 const PlanningContent = ({ step, setStep }) => {
   return (
@@ -34,6 +35,9 @@ const PlanningContent = ({ step, setStep }) => {
 
           {/* TOOL 7 */}
           {step === 7 && <Tool7Policies />}
+
+          {/* TOOL 8 */}
+          {step === 8 && <Overview />}
         </div>
 
         {/* NAVIGATION */}
@@ -47,7 +51,7 @@ const PlanningContent = ({ step, setStep }) => {
             </button>
           )}
 
-          {step < 7 && (
+          {step < 8 && (
             <button
               onClick={() => setStep(step + 1)}
               className="ml-auto flex items-center gap-1 px-3 py-2 bg-green-700 text-white text-sm rounded-lg hover:bg-green-600 transition-all duration-300 hover:scale-105"
