@@ -9,7 +9,7 @@ const ProgramNeedsSkeleton = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <div className="h-6 bg-gray-300 rounded w-64"></div>
-        <div className="h-10 bg-gray-300 rounded w-40"></div>
+        <div className="h-10 bg-gray-300 rounded-full w-10"></div>
       </div>
 
       {/* Objectives */}

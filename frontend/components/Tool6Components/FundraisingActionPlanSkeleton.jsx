@@ -12,7 +12,7 @@ const FundraisingActionPlanSkeleton = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <Skeleton className="h-8 w-80" />
-        <Skeleton className="h-10 w-40 rounded-lg" />
+        <Skeleton className="h-10 rounded-full w-10" />
       </div>
 
       {/* Objectives */}

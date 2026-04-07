@@ -1,9 +1,18 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import useFundraisingPolicies from "../../../hooks/useFundraisingPolicies";
 import { FiSave } from "react-icons/fi";
+import PoliciesSkeleton from "../../Tool7Components/PoliciesSkeleton";
+
+// Deep comparison function to check if data has changed
+const hasDataChanged = (currentData, originalData) => {
+  return JSON.stringify(currentData) !== JSON.stringify(originalData);
+};
 
 const Tool7Policies = () => {
-  const { formData, setFormData, savePolicies, loading } = useFundraisingPolicies();
+  const { formData, setFormData, savePolicies, isLoading, isSaving } = useFundraisingPolicies();
+  const [originalData, setOriginalData] = useState({});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Handle input changes
   const handleChange = (field, value) => {
@@ -16,7 +25,31 @@ const Tool7Policies = () => {
   // Handle save
   const handleSave = async () => {
     await savePolicies();
+    // After successful save, update originalData with current formData
+    setOriginalData({ ...formData });
+    setHasUnsavedChanges(false);
   };
+
+  // Set original data when formData is initially loaded
+  useEffect(() => {
+    if (!isInitialized && !isLoading && formData) {
+      setOriginalData({ ...formData });
+      setIsInitialized(true);
+    }
+  }, [formData, isLoading, isInitialized]);
+
+  // Track changes whenever formData changes (after initialization)
+  useEffect(() => {
+    if (isInitialized) {
+      const changed = hasDataChanged(formData, originalData);
+      setHasUnsavedChanges(changed);
+    }
+  }, [formData, originalData, isInitialized]);
+
+  // Show skeleton while loading
+  if (isLoading) {
+    return <PoliciesSkeleton />;
+  }
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -33,9 +66,21 @@ const Tool7Policies = () => {
       <div className="bg-white rounded-2xl shadow p-6 space-y-6">
         <div className="flex justify-between items-center">
           <h3 className="font-semibold text-lg text-[#001033]">
-            Fundraising Guidelines (Complete the statements below)
+            Fundraising Guidelines
           </h3>
-          
+          <button
+            onClick={handleSave}
+            disabled={isSaving || !hasUnsavedChanges}
+            className={`transition-all duration-600 ${isSaving || !hasUnsavedChanges
+                ? 'w-10 h-10 rounded-full bg-gray-300 text-gray-500 cursor-not-allowed flex items-center justify-center'
+                : 'flex items-center gap-2 px-4 py-2 rounded-full bg-[#22864D] text-white hover:bg-[#1a6b3c]'
+              }`}
+          >
+            <FiSave className={`loading || isSaving || !user || !hasUnsavedChanges` ? 'w-4 h-4' : ''}/>
+              {!( isSaving || !hasUnsavedChanges) && (
+                <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
+              )}
+          </button>
         </div>
 
         {/* QUESTION 1 */}
@@ -139,19 +184,19 @@ const Tool7Policies = () => {
             Example: Board members, management team, finance committee
           </p>
         </div>
-        <div className="flex justify-end pt-4">
-          <button
-            onClick={handleSave}
-            disabled={loading}
-            className={`flex items-center gap-2 px-4 py-2 bg-[#22864D] text-white rounded-lg hover:bg-[#1a6b3c] transition-colors ${
-              loading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-          >
-            <FiSave />
-            {loading ? "Saving..." : "Save Changes"}
-          </button>
-        </div>
       </div>
+
+      {/* Unsaved Changes Indicator */}
+      {hasUnsavedChanges && !isSaving && (
+        <div className="fixed bottom-6 right-6 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 shadow-lg animate-bounce">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-yellow-500 rounded-full animate-ping"></div>
+            <p className="text-sm text-yellow-800">
+              You have unsaved changes. Click "Save Changes" to save.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

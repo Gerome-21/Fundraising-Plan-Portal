@@ -16,12 +16,17 @@ const useFundraisingPolicies = () => {
     policy_responsibility: "",
   });
 
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // For initial data fetch
+  const [isSaving, setIsSaving] = useState(false); // For save operation
 
   // ✅ Fetch existing data
   const fetchPolicies = async () => {
-    if (!user) return;
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
 
+    setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from("fundraising_policies")
@@ -47,6 +52,8 @@ const useFundraisingPolicies = () => {
       }
     } catch (err) {
       console.error("Fetch error:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -57,7 +64,7 @@ const useFundraisingPolicies = () => {
       return;
     }
 
-    setLoading(true);
+    setIsSaving(true);
 
     try {
       // Check if already exists
@@ -101,7 +108,7 @@ const useFundraisingPolicies = () => {
       toast.error("Unexpected error");
     }
 
-    setLoading(false);
+    setIsSaving(false);
   };
 
   useEffect(() => {
@@ -112,7 +119,8 @@ const useFundraisingPolicies = () => {
     formData,
     setFormData,
     savePolicies,
-    loading,
+    isLoading, // For initial data fetch
+    isSaving,  // For save operation
   };
 };
 

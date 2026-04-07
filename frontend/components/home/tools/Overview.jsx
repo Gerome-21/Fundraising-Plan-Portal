@@ -65,19 +65,6 @@ const Overview = () => {
         </div>
       </div>
 
-      {/* ===== INSIGHTS ===== */}
-      <div className="mb-8">
-        <h3 className="font-semibold text-lg mb-2">
-          Key Insights
-        </h3>
-
-        <ul className="list-disc pl-5 text-sm space-y-1 text-gray-700">
-          <li>Most funds are allocated to operational costs</li>
-          <li>Limited fundraising activities may affect target achievement</li>
-          <li>Opportunity to improve donor engagement strategies</li>
-        </ul>
-      </div>
-
       {/* ===== PAGE BREAK LABEL ===== */}
       <div className="text-center text-xs text-gray-400 my-6">
         Tool 1 Summary — Self Assessment

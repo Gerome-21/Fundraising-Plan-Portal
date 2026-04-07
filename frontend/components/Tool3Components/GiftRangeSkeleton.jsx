@@ -7,7 +7,7 @@ const GiftRangeSkeleton = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <div className="h-6 w-60 bg-gray-300 rounded"></div>
-        <div className="h-10 w-40 bg-gray-300 rounded"></div>
+        <div className="h-10 w-10 bg-gray-300 rounded-full"></div>
       </div>
 
       {/* Objectives */}

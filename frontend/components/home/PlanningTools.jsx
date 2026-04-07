@@ -105,7 +105,7 @@ const PlanningTools = ({ steps, step, setStep, isCompactView }) => {
           <button
             onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
             disabled={page === 0}
-            className="px-3 py-1 text-[#22864D] rounded disabled:text-gray-400 disabled:opacity-50 cursor-pointer transition-all duration-300 hover:scale-110"
+            className="px-2 py-1 text-[#22864D] rounded disabled:text-gray-400 disabled:opacity-50 cursor-pointer transition-all duration-300 hover:scale-110"
           >
             <FiArrowLeftCircle className="w-8 h-8" />
           </button>
@@ -113,7 +113,7 @@ const PlanningTools = ({ steps, step, setStep, isCompactView }) => {
           <button
             onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
             disabled={page === totalPages - 1}
-            className="px-3 py-1 text-[#22864D] rounded disabled:text-gray-400 disabled:opacity-50 cursor-pointer transition-all duration-300 hover:scale-110"
+            className="px-2 py-1 text-[#22864D] rounded disabled:text-gray-400 disabled:opacity-50 cursor-pointer transition-all duration-300 hover:scale-110"
           >
             <FiArrowRightCircle className="w-8 h-8" />
           </button>

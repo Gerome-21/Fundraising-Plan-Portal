@@ -65,7 +65,7 @@ export const UserProvider = ({ children }) => {
         }
 
         userData = newUser;
-        toast.success(`Welcome, ${userData.user_name}! Your account has been created.`);
+        toast.success(`Welcome, ${userData.user_name}!`);
       }
       const { ...userWithoutSensitive } = userData;
       setUser(userWithoutSensitive);

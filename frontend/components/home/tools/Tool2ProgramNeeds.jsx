@@ -14,13 +14,9 @@ const Tool2ProgramNeeds = () => {
     loading, 
     initialLoading, 
     saveAllProgramNeeds, 
-    loadProgramNeeds,
-    deleteRequirement 
+    loadProgramNeeds
   } = useProgramNeeds();
 
-  const [deletedRequirementIds, setDeletedRequirementIds] = useState([]);
-  const [pendingDeleteRequirements, setPendingDeleteRequirements] = useState([]);
-  
   const [requirements, setRequirements] = useState([
     { id: null, name: "Program 1", budgets: {}, comments: "" }
   ]);
@@ -34,27 +30,34 @@ const Tool2ProgramNeeds = () => {
 
   const [commentModalState, setCommentModalState] = useState({
     isOpen: false,
-    targetType: null, // 'requirement' or 'committed'
+    targetType: null,
     index: null,
     comment: '',
     position: { top: 0, left: 0 }
   });
 
+  const [isSaving, setIsSaving] = useState(false);
+  const [deletingIndex, setDeletingIndex] = useState(null);
+  const [originalData, setOriginalData] = useState(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+
   // Open comment modal 
- const openCommentModal = (type, index, event) => {
-  const buttonRect = event.currentTarget.getBoundingClientRect();
-  setCommentModalState({
-    isOpen: true,
-    targetType: type,
-    index: index,
-    comment: (type === 'requirement' ? requirements[index] : committedFunds[index])?.comments || '',
-    position: {
-      top: buttonRect.top + window.scrollY,
-      left: buttonRect.left + window.scrollX
-    }
-  });
-};
-  // Update comment in local state (no database save yet)
+  const openCommentModal = (type, index, event) => {
+    const buttonRect = event.currentTarget.getBoundingClientRect();
+    setCommentModalState({
+      isOpen: true,
+      targetType: type,
+      index: index,
+      comment: (type === 'requirement' ? requirements[index] : committedFunds[index])?.comments || '',
+      position: {
+        top: buttonRect.top + window.scrollY,
+        left: buttonRect.left + window.scrollX
+      }
+    });
+  };
+
+  // Update comment in local state 
   const updateComment = (newComment) => {
     if (commentModalState.targetType === 'requirement') {
       const updated = [...requirements];
@@ -78,9 +81,6 @@ const Tool2ProgramNeeds = () => {
     });
   };
 
-  const [isSaving, setIsSaving] = useState(false);
-  const [deletingIndex, setDeletingIndex] = useState(null);
-
   // Load data when component mounts and user is available
   useEffect(() => {
     if (user?.id) {
@@ -90,12 +90,34 @@ const Tool2ProgramNeeds = () => {
 
   const loadUserData = async () => {
     const data = await loadProgramNeeds();
+    let newRequirements = [];
+    let newCommittedFunds = [];
+    
     if (data.requirements.length > 0) {
-      setRequirements(data.requirements);
+      newRequirements = data.requirements;
+    } else {
+      newRequirements = [{ id: null, name: "Program 1", budgets: {}, comments: "" }];
     }
+    
     if (data.committedFunds.length > 0) {
-      setCommittedFunds(data.committedFunds);
+      newCommittedFunds = data.committedFunds;
+    } else {
+      newCommittedFunds = [
+        { id: null, name: "Grants?", budgets: {}, comments: "" },
+        { id: null, name: "Interest Income?", budgets: {}, comments: "" },
+        { id: null, name: "Consultancy Contracts?", budgets: {}, comments: "" },
+        { id: null, name: "Conference/Membership Fees/Sponsorship?", budgets: {}, comments: "" }
+      ];
     }
+    
+    setRequirements(newRequirements);
+    setCommittedFunds(newCommittedFunds);
+    setOriginalData({
+      requirements: JSON.parse(JSON.stringify(newRequirements)),
+      committedFunds: JSON.parse(JSON.stringify(newCommittedFunds))
+    });
+    setIsInitialized(true);
+    setHasUnsavedChanges(false);
   };
 
   const addRequirement = () => {
@@ -106,36 +128,18 @@ const Tool2ProgramNeeds = () => {
   };
 
   const removeRequirement = (index) => {
-  const requirement = requirements[index];
-  
-  // Mark the row for deletion visually
-  setDeletingIndex(index);
-  
-  // If it's an existing requirement (has an id), mark it for pending deletion
-  if (requirement.id) {
-    // Add to pending delete list (to keep visual indicator)
-    setPendingDeleteRequirements(prev => [...prev, requirement.id]);
-    // Also add to deleted IDs list for database deletion
-    setDeletedRequirementIds(prev => [...prev, requirement.id]);
-  } else {
-    // If it's a new unsaved requirement, remove immediately
+    // Visual feedback for deletion
+    setDeletingIndex(index);
+    
+    // Remove the requirement immediately
     const updated = [...requirements];
     updated.splice(index, 1);
     setRequirements(updated);
-  }
-  
-  // Clear deleting state
-  setTimeout(() => {
-    setDeletingIndex(null);
-  }, 300);
-  
-  // Show a different message indicating it will be deleted on save
-  if (requirement.id) {
-    toast.success('Requirement marked for deletion. Click Save to confirm.');
-  } else {
-    toast.success('Requirement removed');
-  }
-};
+    // Clear deleting state
+    setTimeout(() => {
+      setDeletingIndex(null);
+    }, 300);
+  };
 
   const handleRequirementChange = (index, field, value) => {
     const updated = [...requirements];
@@ -155,58 +159,39 @@ const Tool2ProgramNeeds = () => {
     setCommittedFunds(updated);
   };
 
-  const handleCommittedCommentChange = (index, value) => {
-    const updated = [...committedFunds];
-    updated[index].comments = value;
-    setCommittedFunds(updated);
-  };
-
   const handleSaveAll = async () => {
-  if (!user) {
-    toast.error('Please log in to save data');
-    return;
-  }
+    if (!user) {
+      toast.error('Please log in to save data');
+      return;
+    }
 
-  // Filter out pending delete requirements before validation
-  const activeRequirements = requirements.filter(
-    req => !pendingDeleteRequirements.includes(req.id)
-  );
+    // Validate that at least one requirement has a name
+    const hasValidRequirements = requirements.some(req => req.name.trim() !== '');
+    if (!hasValidRequirements) {
+      toast.error('Please add at least one program requirement');
+      return;
+    }
 
-  // Validate that at least one requirement has a name
-  const hasValidRequirements = activeRequirements.some(req => req.name.trim() !== '');
-  if (!hasValidRequirements) {
-    toast.error('Please add at least one program requirement');
-    return;
-  }
-
-  setIsSaving(true);
-  
-  try {
-    // First, delete all marked requirements from database
-    if (deletedRequirementIds.length > 0) {
-      for (const id of deletedRequirementIds) {
-        await deleteRequirement(id);
+    setIsSaving(true);
+    
+    try {
+      const success = await saveAllProgramNeeds(requirements, committedFunds);
+      
+      if (success) {
+        setOriginalData({
+          requirements: JSON.parse(JSON.stringify(requirements)),
+          committedFunds: JSON.parse(JSON.stringify(committedFunds))
+        });
+        setHasUnsavedChanges(false);
+        toast.success('Successfully saved!');
       }
+    } catch (error) {
+      console.error('Error saving:', error);
+      toast.error('Failed to save changes');
+    } finally {
+      setIsSaving(false);
     }
-    
-    // Then save all active requirements (excluding pending deletes)
-    const success = await saveAllProgramNeeds(activeRequirements, committedFunds);
-    
-    if (success) {
-      // Clear deleted IDs and pending delete after successful save
-      setDeletedRequirementIds([]);
-      setPendingDeleteRequirements([]);
-      // Update requirements to only show active ones
-      setRequirements(activeRequirements);
-      toast.success('Successfully saved!');
-    }
-  } catch (error) {
-    console.error('Error saving:', error);
-    toast.error('Failed to save changes');
-  } finally {
-    setIsSaving(false);
-  }
-};
+  };
 
   // Calculate totals for each year
   const calculateYearTotal = (items, year) => {
@@ -215,6 +200,21 @@ const Tool2ProgramNeeds = () => {
       return sum + (typeof value === 'number' && !isNaN(value) ? value : 0);
     }, 0);
   };
+  
+  // Deep comparison function to check if data has changed
+  const hasDataChanged = (currentRequirements, currentCommittedFunds, originalRequirements, originalCommittedFunds) => {
+    if (!originalRequirements || !originalCommittedFunds) return false;
+    return JSON.stringify(currentRequirements) !== JSON.stringify(originalRequirements) ||
+           JSON.stringify(currentCommittedFunds) !== JSON.stringify(originalCommittedFunds);
+  };
+
+  // Track changes after initialization
+  useEffect(() => {
+    if (isInitialized) {
+      const changed = hasDataChanged(requirements, committedFunds, originalData?.requirements, originalData?.committedFunds);
+      setHasUnsavedChanges(changed);
+    }
+  }, [requirements, committedFunds, originalData, isInitialized]);
 
   const requirementTotals = years.map(year => calculateYearTotal(requirements, year));
   const committedTotals = years.map(year => calculateYearTotal(committedFunds, year));
@@ -242,13 +242,17 @@ const Tool2ProgramNeeds = () => {
         </h2>
         <button
           onClick={handleSaveAll}
-          disabled={loading || isSaving || !user}
-          className={`flex items-center gap-2 px-4 py-2 bg-[#22864D] text-white rounded-lg hover:bg-[#1a6b3c] transition-colors ${
-            (loading || isSaving || !user) ? 'opacity-50 cursor-not-allowed' : ''
+          disabled={loading || isSaving || !user || !hasUnsavedChanges}
+          className={`transition-all duration-600 ${
+            loading || isSaving || !user || !hasUnsavedChanges
+              ? 'w-10 h-10 rounded-full bg-gray-300 text-gray-500 cursor-not-allowed flex items-center justify-center'
+              : 'flex items-center gap-2 px-4 py-2 rounded-full bg-[#22864D] text-white hover:bg-[#1a6b3c]'
           }`}
         >
-          <FiSave />
-          {isSaving ? 'Saving...' : 'Save Changes'}
+          <FiSave className={loading || isSaving || !user || !hasUnsavedChanges ? 'w-4 h-4' : ''} />
+          {!(loading || isSaving || !user || !hasUnsavedChanges) && (
+            <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
+          )}
         </button>
       </div>
       
@@ -294,14 +298,11 @@ const Tool2ProgramNeeds = () => {
           {/* PROGRAM REQUIREMENTS */}
           <tbody>
             {requirements.map((req, index) => {
-              const isPendingDelete = req.id && pendingDeleteRequirements.includes(req.id);
-              
               return (
                 <tr
                   key={index}
                   className={`border-t transition-colors duration-300 
-                    ${deletingIndex === index ? 'bg-red-200' : ''}
-                    ${isPendingDelete ? 'bg-red-100 line-through text-gray-500' : 'hover:bg-gray-50'}
+                    ${deletingIndex === index ? 'bg-red-200' : 'hover:bg-gray-50'}
                   `}
                 >
                   {/* Requirement name */}
@@ -317,10 +318,8 @@ const Tool2ProgramNeeds = () => {
                           e.target.value
                         )
                       }
-                      className={`w-full border rounded px-2 py-1 text-xs ${
-                        isPendingDelete ? 'bg-gray-100 text-gray-500' : ''
-                      }`}
-                      disabled={isPendingDelete || loading || isSaving}
+                      className="w-full border rounded px-2 py-1 text-xs"
+                      disabled={loading || isSaving}
                     />
                   </td>
 
@@ -338,10 +337,8 @@ const Tool2ProgramNeeds = () => {
                             e.target.value
                           )
                         }
-                        className={`w-full border rounded px-2 py-1 text-xs text-right ${
-                          isPendingDelete ? 'bg-gray-100 text-gray-500' : ''
-                        }`}
-                        disabled={isPendingDelete || loading || isSaving}
+                        className="w-full border rounded px-2 py-1 text-xs text-right"
+                        disabled={loading || isSaving}
                       />
                     </td>
                   ))}
@@ -350,12 +347,12 @@ const Tool2ProgramNeeds = () => {
                   <td className="p-2">
                     <button
                       onClick={(e) => openCommentModal('requirement', index, e)}
-                      disabled={isPendingDelete || loading || isSaving}
+                      disabled={loading || isSaving}
                       className={`w-full flex items-center justify-between gap-1 px-3 py-2 rounded-lg border transition-all duration-200 ${
                         req.comments && req.comments.trim() !== ''
                           ? 'bg-green-50 border-green-300 hover:bg-green-100'
                           : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                      } ${(isPendingDelete || loading || isSaving) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                      } ${(loading || isSaving) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                     >
                       <span className={`text-xs truncate flex-1 text-left ${
                         req.comments && req.comments.trim() !== '' ? 'text-green-700' : 'text-gray-500'
@@ -376,12 +373,8 @@ const Tool2ProgramNeeds = () => {
                   <td className="text-center">
                     <button
                       onClick={() => removeRequirement(index)}
-                      className={`${
-                        isPendingDelete 
-                          ? 'text-gray-400 cursor-not-allowed' 
-                          : 'text-red-500 hover:text-red-700'
-                      }`}
-                      disabled={loading || isSaving || isPendingDelete}
+                      className="text-red-500 hover:text-red-700"
+                      disabled={loading || isSaving}
                     >
                       <FiTrash2 />
                     </button>
@@ -510,6 +503,18 @@ const Tool2ProgramNeeds = () => {
           initialComment={commentModalState.comment}
           position={commentModalState.position}
         />
+
+        {/* Unsaved Changes Indicator */}
+        {hasUnsavedChanges && !isSaving && !loading && (
+          <div className="fixed bottom-6 right-6 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 shadow-lg animate-bounce">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-ping"></div>
+              <p className="text-sm text-yellow-800">
+                You have unsaved changes. Click "Save Changes" to save.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

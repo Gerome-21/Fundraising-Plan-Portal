@@ -15,11 +15,11 @@ const Tool3GiftRange = () => {
   const { user } = useUser();
   const { loadGiftRanges, saveGiftRanges, loading } = useGiftRange();
   const [isSaving, setIsSaving] = useState(false);
-  const [pendingDeleteIds, setPendingDeleteIds] = useState([]);
   const [deletingIndex, setDeletingIndex] = useState(null);
   const [initialLoading, setInitialLoading] = useState(true);
-
-
+  const [originalData, setOriginalData] = useState([]);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // ADD ROW
   const addRow = () => {
@@ -33,20 +33,12 @@ const Tool3GiftRange = () => {
   const deleteRow = (index) => {
     const row = rows[index];
     
-    // Mark the row for deletion visually
+    // Visual feedback for deletion
     setDeletingIndex(index);
     
-    // If it's an existing row (has an id), mark it for pending deletion
-    if (row.id) {
-      setPendingDeleteIds(prev => [...prev, row.id]);
-      // Show message that it will be deleted on save
-      toast.success('Row marked for deletion. Click Save to confirm.');
-    } else {
-      // If it's a new unsaved row, remove immediately
-      const updated = rows.filter((_, i) => i !== index);
-      setRows(updated);
-      toast.success('Row removed');
-    }
+    // Remove the row immediately
+    const updated = rows.filter((_, i) => i !== index);
+    setRows(updated);
     
     // Clear deleting state
     setTimeout(() => {
@@ -59,6 +51,39 @@ const Tool3GiftRange = () => {
     const updated = [...rows];
     updated[index][field] = value === "" ? "" : Number(value);
     setRows(updated);
+  };
+
+  // Deep comparison function to check if data has changed
+  const hasDataChanged = (currentData, originalData) => {
+    if (!originalData || originalData.length === 0) {
+      // If original is empty but current has data, that's a change
+      return currentData.length > 0;
+    }
+    return JSON.stringify(currentData) !== JSON.stringify(originalData);
+  };
+
+  // Handle save all data
+  const handleSaveAll = async () => {
+    if (!user) {
+      toast.error("Please login first");
+      return;
+    }
+
+    const hasValidRows = rows.some(row => row.giftRange && row.giftRange !== '');
+    if (!hasValidRows) {
+      toast.error('Please add at least one gift range');
+      return;
+    }
+
+    setIsSaving(true);
+    const success = await saveGiftRanges(rows);
+    if (success) {
+      setRows(rows);
+      setOriginalData(JSON.parse(JSON.stringify(rows))); // Update original data after save
+      setHasUnsavedChanges(false); // Clear unsaved changes
+      toast.success('Successfully saved!');
+    }
+    setIsSaving(false);
   };
 
   // COMPUTATIONS
@@ -117,28 +142,46 @@ const Tool3GiftRange = () => {
     }
   }, [user?.id]);
 
+  useEffect(() => {
+    if (isInitialized && !initialLoading) {
+      const changed = hasDataChanged(rows, originalData);
+      setHasUnsavedChanges(changed);
+    }
+  }, [rows, originalData, isInitialized, initialLoading]);
+
   const loadData = async () => {
     setInitialLoading(true);
 
     const data = await loadGiftRanges();
 
+    let newRows;
     if (data.length > 0) {
-      setRows(data);
+      newRows = data;
     } else {
-      setRows([{ giftRange: "", gifts: 0 }]);
+      newRows = [{ giftRange: "", gifts: 0 }];
     }
-
-    setPendingDeleteIds([]);
+    
+    setRows(newRows);
+    setOriginalData(JSON.parse(JSON.stringify(newRows))); // Deep copy for comparison
     setInitialLoading(false);
+    setIsInitialized(true);
+    setHasUnsavedChanges(false);
   };
 
+  // Determine button classes based on state
+  const isButtonInactive = loading || isSaving || !hasUnsavedChanges;
+  
+  const buttonClasses = isButtonInactive
+    ? 'w-10 h-10 rounded-full bg-gray-300 text-gray-500 cursor-not-allowed flex items-center justify-center transition-all duration-600'
+    : 'flex items-center gap-2 px-4 py-2 rounded-full bg-[#22864D] text-white hover:bg-green-700 transition-all duration-600';
+
   if (initialLoading) {
-      return (
-        <>
-          <GiftRangeSkeleton/>
-        </>
-      );
-    }
+    return (
+      <>
+        <GiftRangeSkeleton/>
+      </>
+    );
+  }
 
   return (
     <>
@@ -146,34 +189,14 @@ const Tool3GiftRange = () => {
         <h2 className="text-2xl font-bold text-[#001033]">
           Tool 3: Gift Range Chart
         </h2>
-       <button
-          onClick={async () => {
-            if (!user) {
-              toast.error("Please login first");
-              return;
-            }
-
-            const activeRows = rows.filter(row => !pendingDeleteIds.includes(row.id));
-            const hasValidRows = activeRows.some(row => row.giftRange && row.giftRange !== '');
-            if (!hasValidRows) {
-              toast.error('Please add at least one gift range');
-              return;
-            }
-
-            setIsSaving(true);
-            const success = await saveGiftRanges(activeRows);
-            if (success) {
-              setPendingDeleteIds([]);
-              setRows(activeRows);
-              toast.success('Successfully saved!');
-            }
-            setIsSaving(false);
-          }}
-          disabled={loading || isSaving}
-          className="flex items-center gap-2 px-4 py-2 bg-[#22864D] text-white rounded hover:bg-green-700 disabled:opacity-50"
+        <button
+          onClick={handleSaveAll}
+          disabled={isButtonInactive}
+          className={buttonClasses}
+          title={isButtonInactive ? "No changes to save" : "Save changes"}
         >
-          <FiSave />
-          {isSaving ? "Saving..." : "Save Changes"}
+          <FiSave className={isButtonInactive ? 'w-4 h-4' : ''} />
+          {!isButtonInactive && (isSaving ? "Saving..." : "Save Changes")}
         </button>
       </div>
       <section className="mb-6 ">
@@ -186,7 +209,6 @@ const Tool3GiftRange = () => {
       
       {/* TABLE */}
       <div className="overflow-auto rounded-xl border">
-
         <table className="min-w-full text-sm text-left">
           
           {/* HEADER */}
@@ -204,102 +226,83 @@ const Tool3GiftRange = () => {
           {/* BODY */}
           <tbody className="bg-white">
             {rowsWithCumulative.map((row, index) => {
-            const isPendingDelete = row.id && pendingDeleteIds.includes(row.id);
-            
-            return (
-              <tr 
-                key={index} 
-                className={`border-t transition-colors duration-300 
-                  ${deletingIndex === index ? 'bg-red-200' : ''}
-                  ${isPendingDelete ? 'bg-red-100 line-through text-gray-500' : 'hover:bg-gray-50'}
-                `}
-              >
-                {/* Gift Range (amount) */}
-                <td className="p-2">
-                  <input
-                    type="number"
-                    value={row.giftRange}
-                    onChange={(e) =>
-                      handleChange(index, "giftRange", e.target.value)
-                    }
-                    className={`w-full border rounded px-2 py-1 ${
-                      isPendingDelete ? 'bg-gray-100 text-gray-500' : ''
-                    }`}
-                    placeholder="Enter amount"
-                    disabled={isPendingDelete || loading || isSaving}
-                  />
-                </td>
+              return (
+                <tr 
+                  key={index} 
+                  className="border-t transition-colors duration-300 hover:bg-gray-50"
+                >
+                  {/* Gift Range (amount) */}
+                  <td className="p-2">
+                    <input
+                      type="number"
+                      value={row.giftRange}
+                      onChange={(e) =>
+                        handleChange(index, "giftRange", e.target.value)
+                      }
+                      className="w-full border rounded px-2 py-1"
+                      placeholder="Enter amount"
+                      disabled={loading || isSaving}
+                    />
+                  </td>
 
-                {/* Gifts */}
-                <td className="p-2">
-                  <input
-                    type="number"
-                    min="0"
-                    value={row.gifts}
-                    onChange={(e) =>
-                      handleChange(index, "gifts", e.target.value)
-                    }
-                    className={`w-full border rounded px-2 py-1 ${
-                      isPendingDelete ? 'bg-gray-100 text-gray-500' : ''
-                    }`}
-                    placeholder="0"
-                    disabled={isPendingDelete || loading || isSaving}
-                  />
-                </td>
+                  {/* Gifts */}
+                  <td className="p-2">
+                    <input
+                      type="number"
+                      min="0"
+                      value={row.gifts}
+                      onChange={(e) =>
+                        handleChange(index, "gifts", e.target.value)
+                      }
+                      className="w-full border rounded px-2 py-1"
+                      placeholder="0"
+                      disabled={loading || isSaving}
+                    />
+                  </td>
 
-                {/* Prospects (calculated - read only) */}
-                <td className="p-2">
-                  <input
-                    type="text"
-                    value={row.prospects || 0}
-                    readOnly
-                    className={`w-full rounded px-2 py-1 ${
-                      isPendingDelete ? 'bg-gray-100 text-gray-500' : 'bg-gray-50 text-gray-700'
-                    }`}
-                  />
-                </td>
+                  {/* Prospects (calculated - read only) */}
+                  <td className="p-2">
+                    <input
+                      type="text"
+                      value={row.prospects || 0}
+                      readOnly
+                      className="w-full rounded px-2 py-1 bg-gray-50 text-gray-700"
+                    />
+                  </td>
 
-                {/* Subtotal (calculated - read only) */}
-                <td className="p-2">
-                  <input
-                    type="text"
-                    value={formatCurrency(row.subtotal || 0)}
-                    readOnly
-                    className={`w-full rounded px-2 py-1 text-right ${
-                      isPendingDelete ? 'bg-gray-100 text-gray-500' : 'bg-gray-50 text-gray-700'
-                    }`}
-                  />
-                </td>
+                  {/* Subtotal (calculated - read only) */}
+                  <td className="p-2">
+                    <input
+                      type="text"
+                      value={formatCurrency(row.subtotal || 0)}
+                      readOnly
+                      className="w-full rounded px-2 py-1 text-right bg-gray-50 text-gray-700"
+                    />
+                  </td>
 
-                {/* Cumulative Total (calculated - read only) */}
-                <td className="p-2">
-                  <input
-                    type="text"
-                    value={formatCurrency(row.cumulativeTotal || 0)}
-                    readOnly
-                    className={`w-full rounded px-2 py-1 font-semibold text-right ${
-                      isPendingDelete ? 'bg-gray-100 text-gray-500' : 'bg-gray-50 text-gray-700'
-                    }`}
-                  />
-                </td>
+                  {/* Cumulative Total (calculated - read only) */}
+                  <td className="p-2">
+                    <input
+                      type="text"
+                      value={formatCurrency(row.cumulativeTotal || 0)}
+                      readOnly
+                      className="w-full rounded px-2 py-1 font-semibold text-right bg-gray-50 text-gray-700"
+                    />
+                  </td>
 
-                {/* Delete */}
-                <td className="p-2 text-center">
-                  <button
-                    onClick={() => deleteRow(index)}
-                    className={`${
-                      isPendingDelete 
-                        ? 'text-gray-400 cursor-not-allowed' 
-                        : 'text-red-500 hover:text-red-700'
-                    }`}
-                    disabled={loading || isSaving || isPendingDelete}
-                  >
-                    <FiTrash2 />
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
+                  {/* Delete */}
+                  <td className="p-2 text-center">
+                    <button
+                      onClick={() => deleteRow(index)}
+                      className="text-red-500 hover:text-red-700"
+                      disabled={loading || isSaving}
+                    >
+                      <FiTrash2 />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
             
             {/* Add Row */}
             <tr>
@@ -326,9 +329,19 @@ const Tool3GiftRange = () => {
               <td className="px-3 py-3"></td>
             </tr>
           </tfoot>
-
         </table>
       </div>
+      {/* Unsaved Changes Indicator */}
+      {hasUnsavedChanges && !isSaving && !loading && (
+        <div className="fixed bottom-6 right-6 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 shadow-lg animate-bounce">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-yellow-500 rounded-full animate-ping"></div>
+            <p className="text-sm text-yellow-800">
+              You have unsaved changes. Click "Save Changes" to save.
+            </p>
+          </div>
+        </div>
+      )}
     </>
   );
 };

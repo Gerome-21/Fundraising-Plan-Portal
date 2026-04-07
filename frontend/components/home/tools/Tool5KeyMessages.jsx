@@ -147,10 +147,16 @@ const SummaryStats = ({ allData }) => {
   );
 };
 
+// Deep comparison function to check if data has changed
+const hasDataChanged = (currentData, originalData) => {
+  return JSON.stringify(currentData) !== JSON.stringify(originalData);
+};
+
 // Main Component
 const Tool5KeyMessages = () => {
   const [data, setData] = useState({});
-  const [hasChanges, setHasChanges] = useState(false);
+  const [originalData, setOriginalData] = useState({});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { user } = useUser();
   const { loadKeyMessages, saveKeyMessages, loading, saving } = useKeyMessages(user?.id);
 
@@ -165,26 +171,38 @@ const Tool5KeyMessages = () => {
         },
       },
     }));
-
-    setHasChanges(true);
+    
+    // Check if there are unsaved changes
+    setHasUnsavedChanges(true);
   };
 
   useEffect(() => {
     const init = async () => {
       const loaded = await loadKeyMessages();
       setData(loaded);
+      setOriginalData(loaded); // Store original data for comparison
+      setHasUnsavedChanges(false);
     };
     init();
   }, [loadKeyMessages]);
 
+  // Update hasUnsavedChanges whenever data changes compared to originalData
+  useEffect(() => {
+    const changed = hasDataChanged(data, originalData);
+    setHasUnsavedChanges(changed);
+  }, [data, originalData]);
+
   const handleSaveAll = async () => {
     const success = await saveKeyMessages(data);
-    if (success) setHasChanges(false);
+    if (success) {
+      setOriginalData(data); // Update original data with saved data
+      setHasUnsavedChanges(false); // Clear unsaved changes indicator
+    }
   };
 
- if (loading) {
-  return  <KeyMessagesSkeleton/>;
-}
+  if (loading) {
+    return <KeyMessagesSkeleton/>;
+  }
   
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -199,28 +217,32 @@ const Tool5KeyMessages = () => {
         <div className="flex gap-3">
           <button
             onClick={handleSaveAll}
-            disabled={saving || loading}
-            className={`flex items-center gap-2 px-4 py-2 bg-[#22864D] text-white rounded-lg hover:bg-[#1a6b3c] transition-colors ${
-              saving ? 'opacity-50 cursor-not-allowed' : ''
+            disabled={saving || loading || !hasUnsavedChanges}
+            className={`transition-all duration-600 ${
+              saving || loading || !hasUnsavedChanges
+                ? 'w-10 h-10 rounded-full bg-gray-300 text-gray-500 cursor-not-allowed flex items-center justify-center'
+                  : 'flex items-center gap-2 px-4 py-2 rounded-full bg-[#22864D] text-white hover:bg-[#1a6b3c]'
             }`}
           >
-            <FiSave />
-            {saving ? 'Saving...' : 'Save Changes'}
+            <FiSave className={`saving || loading || !hasUnsavedChanges` ? 'w-4 h-4' : ''}/>
+            {!(loading || saving || !hasUnsavedChanges) && (
+            <span>{saving ? 'Saving...' : 'Save Changes'}</span>
+          )}
           </button>
         </div>
       </div>
       
-        {/* Objectives Section */}
-        <section className="mb-6">
-          <h3 className="font-semibold text-[#001033] mb-2">Objectives</h3>
-          <ul className="text-sm list-disc pl-6 space-y-1">
-            <li>To strategize on how to engage your potential organization donors using strong key messages</li>
-            <li>To identify needed materials and strategies to engage and nurture donors</li>
-          </ul>
-          <p className="text-sm text-gray-600 mt-3">
-            Identify needed Fundraising materials and strategies that correspond to the different potential donors.
-          </p>
-        </section>
+      {/* Objectives Section */}
+      <section className="mb-6">
+        <h3 className="font-semibold text-[#001033] mb-2">Objectives</h3>
+        <ul className="text-sm list-disc pl-6 space-y-1">
+          <li>To strategize on how to engage your potential organization donors using strong key messages</li>
+          <li>To identify needed materials and strategies to engage and nurture donors</li>
+        </ul>
+        <p className="text-sm text-gray-600 mt-3">
+          Identify needed Fundraising materials and strategies that correspond to the different potential donors.
+        </p>
+      </section>
       
       {/* Summary Statistics */}
       {/* {Object.keys(data).length > 0 && <SummaryStats allData={data} />} */}
@@ -241,11 +263,14 @@ const Tool5KeyMessages = () => {
       </div>
       
       {/* Unsaved Changes Indicator */}
-      {hasChanges && (
-        <div className="fixed bottom-6 right-6 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 shadow-lg">
-          <p className="text-sm text-yellow-800">
-            You have unsaved changes. Click "Save All Changes" to save.
-          </p>
+      {hasUnsavedChanges && !saving && (
+        <div className="fixed bottom-6 right-6 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 shadow-lg animate-bounce">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-yellow-500 rounded-full animate-ping"></div>
+            <p className="text-sm text-yellow-800">
+              You have unsaved changes. Click "Save Changes" to save.
+            </p>
+          </div>
         </div>
       )}
     </div>

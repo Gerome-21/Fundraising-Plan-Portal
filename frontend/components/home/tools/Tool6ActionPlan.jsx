@@ -26,8 +26,9 @@ const Tool6ActionPlan = () => {
     toggleProgram: toggleProgramLocal,
     setPrograms
   } = useFundraisingActionPlan();
-  const [pendingDeletePrograms, setPendingDeletePrograms] = useState([]);
-  const [pendingDeleteStrategies, setPendingDeleteStrategies] = useState([]); 
+  const [originalData, setOriginalData] = useState(null); 
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   
   const [isSaving, setIsSaving] = useState(false);
   const [prospectModal, setProspectModal] = useState({
@@ -45,17 +46,28 @@ const Tool6ActionPlan = () => {
     }
   }, [user?.id]);
 
+  useEffect(() => {
+    if (!isInitialized && !initialLoading && programs) {
+      setOriginalData(JSON.parse(JSON.stringify(programs))); // Deep copy
+      setIsInitialized(true);
+      setHasUnsavedChanges(false);
+    }
+  }, [programs, initialLoading, isInitialized]);
+
+  // Track changes after initialization
+  useEffect(() => {
+    if (isInitialized) {
+      const changed = hasDataChanged(programs, originalData);
+      setHasUnsavedChanges(changed);
+    }
+  }, [programs, originalData, isInitialized]);
+
   const addProgram = () => {
     setPrograms(prev => addProgramLocal(prev));
   };
 
   const removeProgram = (programId) => {
-    const program = programs.find(p => p.id === programId);
-    if (program && typeof program.id === 'string') {
-      setPendingDeletePrograms(prev => [...prev, programId]);
-    } else {
-      setPrograms(prev => removeProgramLocal(prev, programId));
-    }
+    setPrograms(prev => removeProgramLocal(prev, programId));
   };
 
   const addStrategy = (programId) => {
@@ -63,13 +75,7 @@ const Tool6ActionPlan = () => {
   };
 
   const removeStrategy = (programId, strategyId) => {
-    const program = programs.find(p => p.id === programId);
-    const strategy = program?.strategies.find(s => s.id === strategyId);
-    if (strategy && typeof strategy.id === 'string') {
-      setPendingDeleteStrategies(prev => [...prev, { programId, strategyId }]);
-    } else {
-      setPrograms(prev => removeStrategyLocal(prev, programId, strategyId));
-    }
+    setPrograms(prev => removeStrategyLocal(prev, programId, strategyId));
   };
 
   const updateProgramName = (programId, name) => {
@@ -130,27 +136,18 @@ const Tool6ActionPlan = () => {
 
     setIsSaving(true);
 
-    // Filter out pending deletes before saving
-    const activePrograms = programs
-      .filter(p => !pendingDeletePrograms.includes(p.id))
-      .map(p => ({
-        ...p,
-        strategies: p.strategies.filter(
-          s => !pendingDeleteStrategies.some(
-            pd => pd.programId === p.id && pd.strategyId === s.id
-          )
-        )
-      }));
-
-    const success = await saveAllData(activePrograms);
+    const success = await saveAllData(programs);
     if (success) {
-      // Update local state directly — no reload
-      setPrograms(activePrograms);
-      setPendingDeletePrograms([]);
-      setPendingDeleteStrategies([]);
+      setOriginalData(JSON.parse(JSON.stringify(programs))); // Update original data after save
+      setHasUnsavedChanges(false); // Clear unsaved changes
     }
 
     setIsSaving(false);
+  };
+
+  const hasDataChanged = (currentData, originalData) => {
+    if (!originalData) return false;
+    return JSON.stringify(currentData) !== JSON.stringify(originalData);
   };
 
   // Calculate totals
@@ -193,13 +190,17 @@ const Tool6ActionPlan = () => {
         </h2>
         <button
           onClick={handleSaveAll}
-          disabled={loading || isSaving || !user}
-          className={`flex items-center gap-2 px-4 py-2 bg-[#22864D] text-white rounded-lg hover:bg-[#1a6b3c] transition-colors ${
-            (loading || isSaving || !user) ? 'opacity-50 cursor-not-allowed' : ''
+          disabled={loading || isSaving || !user || !hasUnsavedChanges}
+          className={`transition-all duration-600 ${
+            loading || isSaving || !user || !hasUnsavedChanges
+              ? 'w-10 h-10 rounded-full bg-gray-300 text-gray-500 cursor-not-allowed flex items-center justify-center'
+                : 'flex items-center gap-2 px-4 py-2 rounded-full bg-[#22864D] text-white hover:bg-[#1a6b3c]'
           }`}
         >
-          <FiSave />
-          {isSaving ? 'Saving...' : 'Save Changes'}
+          <FiSave className={`loading || isSaving || !user || !hasUnsavedChanges` ? 'w-4 h-4' : ''}/>
+          {!(loading || isSaving || !user || !hasUnsavedChanges) && (
+            <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
+          )}
         </button>
       </div>
 
@@ -255,9 +256,7 @@ const Tool6ActionPlan = () => {
             {programs.map((program) => (
               <React.Fragment key={program.id}>
                 {/* Program Row */}
-                <tr className={`bg-gray-100 border-t ${
-                  pendingDeletePrograms.includes(program.id) ? 'bg-red-100' : ''
-                }`}>
+                <tr className="bg-gray-100 border-t">
                   <td colSpan="13" className="px-4 py-3">
                     <div className="flex items-center justify-start">
                       <div className="flex items-center gap-2">
@@ -280,30 +279,19 @@ const Tool6ActionPlan = () => {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => removeProgram(program.id)}
-                          className={`hover:bg-gray-200 ${
-                            pendingDeletePrograms.includes(program.id)
-                              ? 'text-gray-400 cursor-not-allowed'
-                              : 'text-red-500 hover:text-red-700'
-                          }`}
-                          disabled={loading || isSaving || pendingDeletePrograms.includes(program.id)}
+                          className="text-red-500 hover:text-red-700"
+                          disabled={loading || isSaving}
                         >
                           <FiTrash2 size={14} />
                         </button>
                       </div>
                     </div>
-                   </td>
+                  </td>
                 </tr>
 
                 {/* Strategies Rows */}
-                {program.expanded && program.strategies.map((strategy) => {
-                  const isPendingDelete = pendingDeleteStrategies.some(
-                    pd => pd.programId === program.id && pd.strategyId === strategy.id
-                  );
-
-                  return (
-                    <tr key={strategy.id} className={`border-t ${
-                      isPendingDelete ? 'bg-red-100 text-gray-400 line-through' : 'hover:bg-gray-50'
-                    }`}>
+                {program.expanded && program.strategies.map((strategy) => (
+                  <tr key={strategy.id} className="border-t hover:bg-gray-50">
                     <td className="px-4 py-2">
                       <div className="relative flex items-center">
                         <input
@@ -330,7 +318,7 @@ const Tool6ActionPlan = () => {
                           />
                         </button>
                       </div>
-                     </td>
+                    </td>
                     {strategy.years.map((year, idx) => (
                       <React.Fragment key={idx}>
                         <td className="px-2 py-2">
@@ -342,7 +330,7 @@ const Tool6ActionPlan = () => {
                             className="w-full border rounded px-2 py-1 text-xs text-right focus:border-[#22864D] outline-none"
                             disabled={loading || isSaving}
                           />
-                         </td>
+                        </td>
                         <td className="px-2 py-2">
                           <input
                             type="number"
@@ -352,21 +340,20 @@ const Tool6ActionPlan = () => {
                             className="w-full border rounded px-2 py-1 text-xs text-right focus:border-[#22864D] outline-none"
                             disabled={loading || isSaving}
                           />
-                         </td>
+                        </td>
                       </React.Fragment>
                     ))}
                     <td className="px-2 py-2">
                       <button
                         onClick={() => removeStrategy(program.id, strategy.id)}
-                        className={isPendingDelete ? 'text-gray-400 cursor-not-allowed' : 'text-red-700 cursor-pointer'}
-                        disabled={loading || isSaving || isPendingDelete}
+                        className="text-red-700 cursor-pointer hover:text-red-900"
+                        disabled={loading || isSaving}
                       >
                         <FiX size={14} />
                       </button>
                     </td>
                   </tr>
-                  );
-                })}
+                ))}
                 {program.expanded && (
                   <tr>
                     <td colSpan="13" className="px-4 py-3">
@@ -423,6 +410,17 @@ const Tool6ActionPlan = () => {
           )}
         </table>
       </div>
+      {/* Unsaved Changes Indicator */}
+      {hasUnsavedChanges && !isSaving && !loading && (
+        <div className="fixed bottom-6 right-6 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 shadow-lg animate-bounce">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-yellow-500 rounded-full animate-ping"></div>
+            <p className="text-sm text-yellow-800">
+              You have unsaved changes. Click "Save Changes" to save.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Funding Prospects Modal */}
       <FundingProspectsModal

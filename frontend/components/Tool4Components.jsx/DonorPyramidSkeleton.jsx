@@ -11,7 +11,7 @@ const DonorPyramidSkeleton = () => {
       {/* HEADER */}
       <div className="mb-6">
         <SkeletonBox className="h-6 w-64 mb-2" />
-        <SkeletonBox className="h-3 w-40" />
+        <SkeletonBox className="rounded-full w-10 h-10" />
       </div>
 
       {/* STATS */}

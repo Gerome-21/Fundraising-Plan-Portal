@@ -11,7 +11,7 @@ const KeyMessagesSkeleton = () => {
       {/* Header */}
       <div className="flex justify-between mb-4 items-center flex-wrap gap-4">
         <SkeletonBox className="h-8 w-80" />
-        <SkeletonBox className="h-10 w-40 rounded-lg" />
+        <SkeletonBox className="h-10 rounded-full w-10" />
       </div>
 
       {/* Objectives */}
