@@ -97,7 +97,7 @@ export const DonorModal = ({ donor, defaultLevel, defaultHeat, saving, onSave, o
                   type="button"
                   className={`flex flex-col items-center text-center gap-2 p-3 rounded-lg cursor-pointer transition-all duration-150 border-2 ${
                     form[key] 
-                      ? "bg-green-50 border-[#22864D] shadow-md scale-[1.02]" 
+                      ? "bg-[#40F58E]/20 border-[#22864D] shadow-md scale-[1.02]" 
                       : "bg-gray-50 border-gray-200 hover:border-gray-300 hover:bg-gray-100"
                   }`}
                 >

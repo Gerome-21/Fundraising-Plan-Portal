@@ -41,13 +41,13 @@ const Tool4DonorPyramid = () => {
   };
 
   const stats = [
-    { label: "Total Donors", value: donors.length, color: "text-[#001033]", bg: "bg-indigo-50" },
-    { label: "HOT", value: countByHeat("HOT"), color: "text-red-700", bg: "bg-red-50" },
-    { label: "WARM", value: countByHeat("WARM"), color: "text-yellow-800", bg: "bg-yellow-50" },
-    { label: "COLD", value: countByHeat("COLD"), color: "text-blue-900", bg: "bg-blue-50" },
-    { label: "HIGH Level", value: countByLevel("HIGH"), color: "text-emerald-800", bg: "bg-emerald-50" },
-    { label: "MEDIUM", value: countByLevel("MEDIUM"), color: "text-indigo-700", bg: "bg-indigo-50" },
-    { label: "LOW Level", value: countByLevel("LOW"), color: "text-gray-500", bg: "bg-gray-100" },
+    { label: "Total Donors", value: donors.length, color: "text-[#001033]", bg: "bg-green-50" },
+    { label: "HOT", value: countByHeat("HOT"), color: "text-emerald-900", bg: "bg-emerald-100" },
+    { label: "WARM", value: countByHeat("WARM"), color: "text-green-800", bg: "bg-green-100" },
+    { label: "COLD", value: countByHeat("COLD"), color: "text-green-600", bg: "bg-green-50" },
+    { label: "HIGH Level", value: countByLevel("HIGH"), color: "text-emerald-900", bg: "bg-emerald-100" },
+    { label: "MEDIUM", value: countByLevel("MEDIUM"), color: "text-green-700", bg: "bg-green-100" },
+    { label: "LOW Level", value: countByLevel("LOW"), color: "text-green-500", bg: "bg-green-50" },
   ];
 
   if (loading) {

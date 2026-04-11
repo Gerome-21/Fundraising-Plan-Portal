@@ -37,14 +37,14 @@ export const DonorCard = ({ donor, onEdit, onDelete }) => {
           ×
         </button>
       </div>
-      {/* <div className="flex gap-1 pl-0.5">
+      <div className="flex gap-1 pl-0.5">
         {["Con", "Cap", "Concern"].map((label, i) => (
           <div key={label} className="flex items-center gap-0.5">
             <CIcon active={cs[i]} />
             <span className={`text-[9px] ${hc.text} opacity-70`}>{label}</span>
           </div>
         ))}
-      </div> */}
+      </div>
     </div>
   );
 };
