@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { HEAT_CONFIG, LEVEL_ORDER } from "./heatConfig";
+import { FiHeart, FiTarget, FiDollarSign } from "react-icons/fi";
+import { MdHandshake } from "react-icons/md";
 
 const deriveHeat = (connection, capability, concern) => {
   const count = [connection, capability, concern].filter(Boolean).length;
@@ -30,6 +32,10 @@ export const DonorModal = ({ donor, defaultLevel, defaultHeat, saving, onSave, o
       return next;
     });
 
+  const toggleC = (key) => {
+    set(key, !form[key]);
+  };
+
   const hc = HEAT_CONFIG[form.heat];
 
   return (
@@ -37,12 +43,12 @@ export const DonorModal = ({ donor, defaultLevel, defaultHeat, saving, onSave, o
       className="fixed inset-0 bg-[rgba(0,16,51,0.45)] flex items-center justify-center z-[1000] p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white rounded-2xl p-7 w-full max-w-[420px] shadow-[0_20px_60px_rgba(0,16,51,0.18)]">
+      <div className="bg-white rounded-2xl p-7 w-full max-w-[600px] shadow-[0_20px_60px_rgba(0,16,51,0.18)]">
         <div className="flex justify-between items-center mb-5">
           <h3 className="m-0 text-lg font-bold text-[#001033]">
             {donor?.id ? "Edit Donor" : "Add Donor"}
           </h3>
-          <button onClick={onClose} className="bg-transparent border-none text-[22px] cursor-pointer text-gray-500 leading-none">
+          <button onClick={onClose} className="bg-transparent border-none text-[22px] cursor-pointer text-gray-500 leading-none hover:text-gray-700">
             ×
           </button>
         </div>
@@ -54,7 +60,7 @@ export const DonorModal = ({ donor, defaultLevel, defaultHeat, saving, onSave, o
               value={form.name}
               onChange={(e) => set("name", e.target.value)}
               placeholder="Full name"
-              className="w-full px-3 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm outline-none text-gray-900 focus:border-[#001033] transition-colors"
+              className="w-full px-3 py-2.5 border-[1.5px] border-gray-200 rounded-lg text-sm outline-none text-gray-900 focus:border-[#22864D] transition-colors"
             />
           </div>
 
@@ -67,7 +73,7 @@ export const DonorModal = ({ donor, defaultLevel, defaultHeat, saving, onSave, o
                   onClick={() => set("level", l)}
                   className={`flex-1 py-2 px-1 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 border-2 ${
                     form.level === l
-                      ? "bg-[#001033] text-white border-[#001033]"
+                      ? "bg-[#22864D] text-white border-[#22864D]"
                       : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
                   }`}
                 >
@@ -79,29 +85,36 @@ export const DonorModal = ({ donor, defaultLevel, defaultHeat, saving, onSave, o
 
           <div>
             <label className="text-xs font-semibold text-gray-700 block mb-2">The Three C's</label>
-            <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {[
-                { key: "connection", label: "Connection", desc: "Relationship with your org" },
-                { key: "capability", label: "Capability", desc: "Financial ability to give" },
-                { key: "concern", label: "Concern", desc: "Passion for your mission" },
-              ].map(({ key, label, desc }) => (
-                <label
+                { key: "connection", label: "Connection", desc: "Relationship with your org", icon: <MdHandshake className="w-6 h-6" /> },
+                { key: "capability", label: "Capability", desc: "Financial ability to give", icon: <FiDollarSign className="w-6 h-6" /> },
+                { key: "concern",    label: "Concern",    desc: "Passion for your mission",  icon: <FiHeart className="w-6 h-6" /> },
+              ].map(({ key, label, desc, icon }) => (
+                <button
                   key={key}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-150 border-[1.5px] ${
-                    form[key] ? "bg-blue-50 border-blue-400" : "bg-gray-50 border-gray-200"
+                  onClick={() => toggleC(key)}
+                  type="button"
+                  className={`flex flex-col items-center text-center gap-2 p-3 rounded-lg cursor-pointer transition-all duration-150 border-2 ${
+                    form[key] 
+                      ? "bg-green-50 border-[#22864D] shadow-md scale-[1.02]" 
+                      : "bg-gray-50 border-gray-200 hover:border-gray-300 hover:bg-gray-100"
                   }`}
                 >
-                  <input
-                    type="checkbox"
-                    checked={form[key]}
-                    onChange={(e) => set(key, e.target.checked)}
-                    className="w-4 h-4 cursor-pointer accent-[#001033]"
-                  />
+                  <div className={`transition-colors duration-150 ${
+                    form[key] ? "animate-pulse " : "text-gray-500"
+                  }`}>
+                    {icon}
+                  </div>
                   <div>
-                    <p className="m-0 text-[13px] font-semibold text-gray-900">{label}</p>
+                    <p className={`m-0 text-[13px] font-semibold transition-colors duration-150 ${
+                      form[key] ? "text-[#22864D]" : "text-gray-900"
+                    }`}>
+                      {label}
+                    </p>
                     <p className="m-0 text-[11px] text-gray-500">{desc}</p>
                   </div>
-                </label>
+                </button>
               ))}
             </div>
           </div>
@@ -126,7 +139,7 @@ export const DonorModal = ({ donor, defaultLevel, defaultHeat, saving, onSave, o
               disabled={saving}
               className={`flex-[2] py-3 border-none rounded-lg text-white text-sm font-bold transition-colors duration-150 ${
                 form.name.trim() && !saving
-                  ? "bg-[#001033] cursor-pointer hover:bg-[#002060]"
+                  ? "bg-[#22864D] cursor-pointer hover:bg-[#1a6b3c]"
                   : "bg-gray-400 cursor-not-allowed"
               }`}
             >

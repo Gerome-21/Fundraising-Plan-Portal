@@ -42,7 +42,7 @@ export const PyramidGrid = ({ donors, filterHeat, onEditDonor, onDeleteDonor, on
       <div ref={gridRef} className="relative z-10 w-full flex flex-col items-center">
         {LEVEL_ORDER.map((level, li) => (
           <div key={level} className={`${PYRAMID_WIDTHS[level]} ${li === 0 ? "mx-auto" : ""} transition-all duration-300`}>
-            <div className="grid grid-cols-[40px_1fr_1fr_1fr] gap-2 items-start mb-2">
+            <div className="grid grid-cols-[40px_1fr_1fr_1fr] gap-2 items-stretch mb-2">
               {/* Row label */}
               <div className="flex items-center justify-end pr-2.5 pt-3">
                 <span className="text-[11px] font-bold text-[#001033] uppercase tracking-widest [writing-mode:vertical-rl] rotate-180">
@@ -58,7 +58,7 @@ export const PyramidGrid = ({ donors, filterHeat, onEditDonor, onDeleteDonor, on
                 return (
                   <div
                     key={heat}
-                    className={`min-h-[120px] border-[1.5px] rounded-xl p-2.5 flex flex-col gap-2 transition-opacity duration-200 ${
+                    className={`h-full min-h-[120px] border-[1.5px] rounded-xl p-2.5 flex flex-col gap-2 transition-opacity duration-200 ${
                       isFiltered ? "bg-gray-50 border-gray-200 opacity-40" : hc.filterBorder
                     }`}
                   >
