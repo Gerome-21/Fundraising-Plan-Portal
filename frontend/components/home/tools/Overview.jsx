@@ -1,133 +1,116 @@
-import React from "react";
+// Overview.jsx
+import React, { useRef } from 'react';
+import { useOverviewData } from '../../../hooks/useOverviewData';
+import Tool1OverviewSection from '../../OverviewSections/Tool1OverviewSection';
+import Tool2OverviewSection from '../../OverviewSections/Tool2OverviewSection';
+import Tool3OverviewSection from '../../OverviewSections/Tool3OverviewSection';
+import Tool4OverviewSection from '../../OverviewSections/Tool4OverviewSection';
+import { FiDownload, FiPrinter } from 'react-icons/fi';
+import { useReactToPrint } from 'react-to-print';
+import { useUser } from '../../../context/UserContext';
+
 
 const Overview = () => {
+  const { isLoading, tool1, tool2, tool3, tool4 } = useOverviewData();
+  const { user} = useUser();
+  const printRef = useRef();
+
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: 'Fundraising Plan Report',
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64 text-gray-400">
+        Loading overview...
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white text-[#001033] p-8 max-w-5xl mx-auto">  
-    
+    <div className="bg-white text-[#001033] max-w-5xl mx-auto">
 
-      {/* ===== HEADER / COVER ===== */}
-      <div className="text-center border-b pb-6 mb-6">
-        <h1 className="text-3xl font-bold">
-          Organization Name
-        </h1>
-
-        <h2 className="text-xl mt-2 font-semibold">
-          Fundraising Plan Report
-        </h2>
-
-        <p className="text-sm text-gray-600 mt-2">
-          Prepared by: Authorized NGO / User Name
-        </p>
-
-        <p className="text-xs text-gray-500">
-          Date Generated: {new Date().toLocaleDateString()}
-        </p>
+      {/* Print/Download Controls — excluded from PDF via @media print CSS */}
+      <div className="flex justify-end gap-3 p-4 print:hidden">
+        <button
+          onClick={handlePrint}
+          className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+        >
+          <FiPrinter size={15} /> Print
+        </button>
+        {/* PDF download: add html2canvas+jsPDF here later */}
+        <button
+          className="flex items-center gap-2 px-4 py-2 bg-[#22864D] text-white rounded-lg text-sm hover:bg-[#1a6b3c]"
+        >
+          <FiDownload size={15} /> Download PDF
+        </button>
       </div>
 
-      {/* ===== EXECUTIVE SUMMARY ===== */}
-      <div className="mb-6">
-        <h3 className="font-semibold text-lg mb-2">
-          Executive Summary
-        </h3>
-        <p className="text-sm text-gray-700 leading-relaxed">
-          This report summarizes the organization’s fundraising plan based on
-          the completed planning tools. It highlights key strategies, financial
-          projections, and organizational insights to support effective
-          decision-making and implementation.
-        </p>
-      </div>
+      {/* ── Printable Area ── */}
+      <div ref={printRef} className="p-8">
 
-      {/* ===== KEY METRICS ===== */}
-      <div className="mb-6">
-        <h3 className="font-semibold text-lg mb-3">
-          Key Metrics
-        </h3>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="border rounded-xl p-4 text-center">
-            <p className="text-xs text-gray-500">Target Funds</p>
-            <p className="font-bold text-lg">₱ 0.00</p>
+        {/* Header */}
+        <div className="flex justify-between items-start pb-6 mb-6 border-b">
+          <div>
+            <h2 className="text-xl mt-2 font-bold">{user.organization_name}</h2>
+            <p className="text-sm text-gray-600">Prepared by: {user.user_name}</p>
+            <p className="text-xs text-gray-500">
+              Date Generated: {new Date().toLocaleDateString()}
+            </p>
           </div>
-
-          <div className="border rounded-xl p-4 text-center">
-            <p className="text-xs text-gray-500">Total Budget</p>
-            <p className="font-bold text-lg">₱ 0.00</p>
-          </div>
-
-          <div className="border rounded-xl p-4 text-center">
-            <p className="text-xs text-gray-500">Activities</p>
-            <p className="font-bold text-lg">0</p>
-          </div>
-
-          <div className="border rounded-xl p-4 text-center">
-            <p className="text-xs text-gray-500">Duration</p>
-            <p className="font-bold text-lg">0 Months</p>
+          <div className="flex items-start gap-3 text-right">
+            <div>
+              <h2 className="text-base font-bold text-[#22864D]">Akubo Software, Inc.</h2>
+              <p className="text-xs font-semibold text-gray-700">Fundraising Plan Portal</p>
+              <p className="text-xs text-gray-500">https://www.akubo.com</p>
+            </div>
+            <img src="/akubo.jpg" alt="Akubo Logo" className="w-12 h-12 object-contain rounded-full" />
           </div>
         </div>
-      </div>
 
-      {/* ===== PAGE BREAK LABEL ===== */}
-      <div className="text-center text-xs text-gray-400 my-6">
-        Tool 1 Summary — Self Assessment
-      </div>
+        {/* Executive Summary */}
+        <div className="mb-8 border-b border-dashed pb-6 text-center">
+          <h2 className="font-semibold text-xl mb-2">Fundraising Plan Report</h2>
+          <p className="text-sm text-gray-700 leading-relaxed">
+            This report summarizes the organization's fundraising plan based on the completed
+            planning tools. It highlights key strategies, financial projections, and
+            organizational insights to support effective decision-making and implementation.
+          </p>
+        </div>
 
-      {/* ===== TOOL 1: SWOT SUMMARY ===== */}
-      <div className="mb-6">
-        <h3 className="font-semibold text-lg mb-3">
-          SWOT Analysis Summary
-        </h3>
+        {/* Tool Sections */}
+        <Tool1OverviewSection
+          swotData={tool1.swotData}
+          chart={tool1.chart}
+          chartData={tool1.chartData}
+        />
 
-        <div className="grid md:grid-cols-2 gap-4">
+        <Tool2OverviewSection
+          requirements={tool2.requirements}
+          committedFunds={tool2.committedFunds}
+          years={tool2.years}
+          requirementTotals={tool2.requirementTotals}
+          committedTotals={tool2.committedTotals}
+          gaps={tool2.gaps}
+        />
 
-          <div className="border rounded-xl p-4 bg-green-50">
-            <h4 className="font-semibold text-green-700 mb-1">Strengths</h4>
-            <p className="text-sm text-gray-700">
-              Summary of key strengths...
-            </p>
-          </div>
+        <Tool3OverviewSection
+          rows={tool3.rows}
+          totals={tool3.totals}
+        />
 
-          <div className="border rounded-xl p-4 bg-red-50">
-            <h4 className="font-semibold text-red-700 mb-1">Weaknesses</h4>
-            <p className="text-sm text-gray-700">
-              Summary of weaknesses...
-            </p>
-          </div>
+        <Tool4OverviewSection
+          donors={tool4.donors}
+          donorMatrix={tool4.donorMatrix}
+          stats={tool4.stats}
+        />
 
-          <div className="border rounded-xl p-4 bg-blue-50">
-            <h4 className="font-semibold text-blue-700 mb-1">Opportunities</h4>
-            <p className="text-sm text-gray-700">
-              Summary of opportunities...
-            </p>
-          </div>
-
-          <div className="border rounded-xl p-4 bg-yellow-50">
-            <h4 className="font-semibold text-yellow-700 mb-1">Threats</h4>
-            <p className="text-sm text-gray-700">
-              Summary of threats...
-            </p>
-          </div>
-
+        {/* Footer */}
+        <div className="text-center text-xs text-gray-400 mt-10 border-t pt-4">
+          End of Overview — Detailed planning tools follow in the next sections
         </div>
       </div>
-
-      {/* ===== TOOL 1: ORG STRUCTURE ===== */}
-      <div className="mb-6">
-        <h3 className="font-semibold text-lg mb-3">
-          Organizational Structure
-        </h3>
-
-        <div className="border rounded-xl h-56 flex items-center justify-center bg-gray-50">
-          <span className="text-gray-400 text-sm">
-            Organizational Chart Preview
-          </span>
-        </div>
-      </div>
-
-      {/* ===== FOOTER ===== */}
-      <div className="text-center text-xs text-gray-400 mt-10">
-        End of Overview — Detailed planning tools follow in the next sections
-      </div>
-
     </div>
   );
 };

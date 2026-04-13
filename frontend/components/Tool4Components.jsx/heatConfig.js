@@ -2,7 +2,7 @@ export const HEAT_CONFIG = {
   HOT: {
     label: "HOT",
     sub: "3 C's",
-    bg: "bg-emerald-100",
+    bg: "bg-emerald-200",
     text: "text-emerald-900",
     badgeBg: "bg-emerald-600",
     badgeText: "text-white",

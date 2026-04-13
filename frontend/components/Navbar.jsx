@@ -20,7 +20,7 @@ const Navbar = () => {
         <div className="relative">
           <img 
             src="/akubo.jpg" 
-            alt="PharmaSync Logo"
+            alt="Akubo Logo"
             className="h-12 rounded-full w-auto transform group-hover:scale-110 transition-all duration-300"
           />
           <div className="absolute -inset-2 bg-blue-100 rounded-full opacity-0 group-hover:opacity-50 transition-all duration-300"></div>
