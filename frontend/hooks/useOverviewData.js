@@ -4,10 +4,24 @@ import { useSelfAssessment } from './useSelfAssessment';
 import { useProgramNeeds } from './useProgramNeeds';
 import { useGiftRange } from './useGiftRange';
 import usePotentialDonor from './usePotentialDonor';
+import {useKeyMessages} from './useKeyMessages';
+import { useUser } from '../context/UserContext';
 
 const years = ["2026", "2027", "2028", "2029", "2030"];
 
+const SECTIONS = [
+  { id: "awareness", title: "Raise Awareness" },
+  { id: "interest",  title: "Capture Their Interest" },
+  { id: "action",    title: "Call to Action" },
+  { id: "benefits",  title: "Benefits" },
+];
+const DONOR_TYPES      = ["members", "corporates", "hnwi"];
+const DONOR_TYPE_LABELS = { members: "Members", corporates: "Corporates", hnwi: "High Net Worth Individuals" };
+const DONOR_CATEGORIES = ["current", "former", "potential"];
+
 export const useOverviewData = () => {
+  const { user } = useUser();
+
   // ── Tool 1 — auto-fetches via its own useEffects ──────────────────
   const { swotData, chart, chartData, loading: tool1Loading } = useSelfAssessment();
 
@@ -35,6 +49,15 @@ export const useOverviewData = () => {
 
   // Tool 4 — auto-fetches via its own useEffect, just destructure
   const { donors, loading: tool4Loading } = usePotentialDonor();
+
+  // Tool 5 — manual load
+  const { loadKeyMessages } = useKeyMessages(user?.id);
+  const [tool5Data, setTool5Data]       = useState({});
+  const [tool5Loading, setTool5Loading] = useState(true);
+  useEffect(() => {
+    if (!user?.id) return;
+    loadKeyMessages().then(data => { setTool5Data(data); setTool5Loading(false); });
+  }, [user?.id]);
 
   // ── Tool 2 calculations ───────────────────────────────────────────
   const calcYearTotal = (items, year) =>
@@ -93,8 +116,23 @@ export const useOverviewData = () => {
     if (tool4Stats.byLevel[d.level] !== undefined) tool4Stats.byLevel[d.level]++;
   });
 
+  // ── Tool 5 derived data ──────────────────────────────────────────────
+  const tool5Summary = DONOR_CATEGORIES.reduce((acc, cat) => {
+    acc[cat] = DONOR_TYPES.reduce((dAcc, dt) => {
+      dAcc[dt] = SECTIONS.reduce((sum, sec) => {
+        return sum + (Number(tool5Data?.[sec.id]?.[cat]?.[dt]) || 0);
+      }, 0);
+      return dAcc;
+    }, {});
+    return acc;
+  }, {});
+
+  // Grand total across everything
+  const tool5GrandTotal = DONOR_CATEGORIES.reduce((sum, cat) =>
+    sum + DONOR_TYPES.reduce((s2, dt) => s2 + (tool5Summary[cat][dt] || 0), 0), 0);
+
   return {
-    isLoading: tool1Loading || tool2Loading || tool3Loading || tool4Loading,
+    isLoading: tool1Loading || tool2Loading || tool3Loading || tool4Loading || tool5Loading,
 
     tool1: {
       swotData, chart, chartData,
@@ -120,6 +158,14 @@ export const useOverviewData = () => {
       donors, donorMatrix, stats: tool4Stats,
       LEVEL_ORDER, HEAT_ORDER,
       isComplete: donors.length > 0,
+    },
+    tool5: {
+      rawData:    tool5Data,
+      summary:    tool5Summary,
+      grandTotal: tool5GrandTotal,
+      sections:   SECTIONS,
+      DONOR_TYPES, DONOR_TYPE_LABELS, DONOR_CATEGORIES,
+      isComplete: tool5GrandTotal > 0,
     },
   };
 };
