@@ -5,6 +5,8 @@ import { useProgramNeeds } from './useProgramNeeds';
 import { useGiftRange } from './useGiftRange';
 import usePotentialDonor from './usePotentialDonor';
 import {useKeyMessages} from './useKeyMessages';
+import {useFundraisingActionPlan } from './useFundrasingActionPlan';
+import { useFundraisingPolicies } from './useFundraisingPolicies';
 import { useUser } from '../context/UserContext';
 
 const years = ["2026", "2027", "2028", "2029", "2030"];
@@ -18,6 +20,7 @@ const SECTIONS = [
 const DONOR_TYPES      = ["members", "corporates", "hnwi"];
 const DONOR_TYPE_LABELS = { members: "Members", corporates: "Corporates", hnwi: "High Net Worth Individuals" };
 const DONOR_CATEGORIES = ["current", "former", "potential"];
+const ACTION_YEARS      = ["Year 1", "Year 2", "Year 3", "Year 4", "Year 5"];
 
 export const useOverviewData = () => {
   const { user } = useUser();
@@ -57,6 +60,17 @@ export const useOverviewData = () => {
   useEffect(() => {
     if (!user?.id) return;
     loadKeyMessages().then(data => { setTool5Data(data); setTool5Loading(false); });
+  }, [user?.id]);
+
+  // ── Tool 6 ────────────────────────────────────────────────────────────
+  const {
+    programs: tool6Programs,
+    loadData: loadTool6,
+    initialLoading: tool6Loading,
+  } = useFundraisingActionPlan();
+
+  useEffect(() => {
+    if (user?.id) loadTool6();
   }, [user?.id]);
 
   // ── Tool 2 calculations ───────────────────────────────────────────
@@ -131,8 +145,50 @@ export const useOverviewData = () => {
   const tool5GrandTotal = DONOR_CATEGORIES.reduce((sum, cat) =>
     sum + DONOR_TYPES.reduce((s2, dt) => s2 + (tool5Summary[cat][dt] || 0), 0), 0);
 
+  // ── Tool 6 derived data ───────────────────────────────────────────────
+  const tool6Totals = ACTION_YEARS.reduce((acc, _, yi) => {
+    acc.expenses[yi] = 0;
+    acc.revenue[yi]  = 0;
+    tool6Programs.forEach(p =>
+      p.strategies.forEach(s => {
+        acc.expenses[yi] += parseFloat(s.years[yi]?.expenses) || 0;
+        acc.revenue[yi]  += parseFloat(s.years[yi]?.revenue)  || 0;
+      })
+    );
+    return acc;
+  }, { expenses: Array(5).fill(0), revenue: Array(5).fill(0) });
+
+  // Collect all funding prospects that have content (for notes block)
+  const tool6FundingNotes = [];
+  tool6Programs.forEach(p =>
+    p.strategies.forEach(s => {
+      if (s.fundingProspects?.trim()) {
+        tool6FundingNotes.push({
+          program:  p.name,
+          strategy: s.name,
+          note:     s.fundingProspects,
+        });
+      }
+    })
+  );
+
+  // ── Tool 7 — auto-fetches via its own useEffect ───────────────────
+  const { formData: tool7FormData, isLoading: tool7Loading } = useFundraisingPolicies();
+
+  const POLICY_FIELDS = [
+    { key: "partner_with",               label: "1. We will partner with..."                                       },
+    { key: "not_partner_with",           label: "2. We will NOT partner with..."                                   },
+    { key: "contribution_handling",      label: "3. Upon receiving contributions, we will..."                      },
+    { key: "fund_usage",                 label: "4. The funds raised will be used for..."                          },
+    { key: "stakeholder_acknowledgement",label: "5. We will acknowledge stakeholders by..."                        },
+    { key: "policy_responsibility",      label: "6. Fundraising policy formulation is the responsibility of..."   },
+  ];
+
+  // Check if at least one field has content
+  const tool7HasContent = POLICY_FIELDS.some(f => tool7FormData?.[f.key]?.trim());
+
   return {
-    isLoading: tool1Loading || tool2Loading || tool3Loading || tool4Loading || tool5Loading,
+    isLoading: tool1Loading || tool2Loading || tool3Loading || tool4Loading || tool5Loading || tool6Loading || tool7Loading,
 
     tool1: {
       swotData, chart, chartData,
@@ -166,6 +222,18 @@ export const useOverviewData = () => {
       sections:   SECTIONS,
       DONOR_TYPES, DONOR_TYPE_LABELS, DONOR_CATEGORIES,
       isComplete: tool5GrandTotal > 0,
+    },
+    tool6: {
+      programs:     tool6Programs,
+      totals:       tool6Totals,
+      fundingNotes: tool6FundingNotes,
+      years:        ACTION_YEARS,
+      isComplete:   tool6Programs.length > 0,
+    },
+    tool7: {
+      formData:     tool7FormData,
+      fields:       POLICY_FIELDS,
+      isComplete:   tool7HasContent,
     },
   };
 };

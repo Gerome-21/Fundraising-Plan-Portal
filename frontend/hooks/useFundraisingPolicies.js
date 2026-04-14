@@ -4,7 +4,7 @@ import supabase from "../src/supabase-connect";
 import { useUser } from "../context/UserContext";
 import toast from "react-hot-toast";
 
-const useFundraisingPolicies = () => {
+export const useFundraisingPolicies = () => {
   const { user } = useUser();
 
   const [formData, setFormData] = useState({

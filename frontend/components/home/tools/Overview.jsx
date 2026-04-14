@@ -6,13 +6,15 @@ import Tool2OverviewSection from '../../OverviewSections/Tool2OverviewSection';
 import Tool3OverviewSection from '../../OverviewSections/Tool3OverviewSection';
 import Tool4OverviewSection from '../../OverviewSections/Tool4OverviewSection';
 import Tool5OverviewSection from '../../OverviewSections/Tool5OverviewSection';
+import Tool6OverviewSection from '../../OverviewSections/Tool6OverviewSection';
+import Tool7OverviewSection from '../../OverviewSections/Tool7OverviewSection';
 import { FiDownload, FiPrinter } from 'react-icons/fi';
 import { useReactToPrint } from 'react-to-print';
 import { useUser } from '../../../context/UserContext';
 
 
 const Overview = () => {
-  const { isLoading, tool1, tool2, tool3, tool4, tool5 } = useOverviewData();
+  const { isLoading, tool1, tool2, tool3, tool4, tool5, tool6, tool7 } = useOverviewData();
   const { user} = useUser();
   const printRef = useRef();
 
@@ -113,9 +115,20 @@ const Overview = () => {
           grandTotal={tool5.grandTotal}
         />
 
+        <Tool6OverviewSection
+          programs={tool6.programs}
+          totals={tool6.totals}
+          fundingNotes={tool6.fundingNotes}
+        />
+
+      <Tool7OverviewSection
+        formData={tool7.formData}
+        fields={tool7.fields}
+      />
+
         {/* Footer */}
         <div className="text-center text-xs text-gray-400 mt-10 border-t pt-4">
-          End of Overview — Detailed planning tools follow in the next sections
+           — End of Overview — 
         </div>
       </div>
     </div>
