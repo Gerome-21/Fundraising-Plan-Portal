@@ -41,11 +41,11 @@ const Tool4DonorPyramid = () => {
   };
 
   const stats = [
-    { label: "Total Donors", value: donors.length, color: "text-[#001033]", bg: "bg-green-50" },
-    { label: "HOT", value: countByHeat("HOT"), color: "text-emerald-900", bg: "bg-emerald-100" },
-    { label: "WARM", value: countByHeat("WARM"), color: "text-green-800", bg: "bg-green-100" },
-    { label: "COLD", value: countByHeat("COLD"), color: "text-green-600", bg: "bg-green-50" },
-    { label: "HIGH Level", value: countByLevel("HIGH"), color: "text-emerald-900", bg: "bg-emerald-100" },
+    { label: "Total Donors", value: donors.length, color: "text-white", bg: "bg-emerald-800" },
+    { label: "HOT", value: countByHeat("HOT"), color: "text-black", bg: "bg-gray-200" },
+    { label: "WARM", value: countByHeat("WARM"), color: "text-black", bg: "bg-gray-100" },
+    { label: "COLD", value: countByHeat("COLD"), color: "text-black", bg: "bg-gray-50" },
+    { label: "HIGH Level", value: countByLevel("HIGH"), color: "text-emerald-900", bg: "bg-green-200" },
     { label: "MEDIUM", value: countByLevel("MEDIUM"), color: "text-green-700", bg: "bg-green-100" },
     { label: "LOW Level", value: countByLevel("LOW"), color: "text-green-500", bg: "bg-green-50" },
   ];

@@ -33,7 +33,7 @@ const SectionTable = ({ section, sectionData }) => {
     <div className="mb-5 rounded-xl border overflow-hidden">
 
       {/* Section header */}
-      <div className={`bg-gray-600 px-4 py-2.5 flex items-center gap-2`}>
+      <div className={`bg-black px-4 py-2.5 flex items-center gap-2`}>
         <span className="text-white text-xs font-bold uppercase tracking-widest">
           {section.title}
         </span>
@@ -197,6 +197,16 @@ const Tool5OverviewSection = ({ rawData, summary, grandTotal }) => {
       <h3 className="font-semibold text-lg mb-4 border-b pb-2">
         Tool 5 — Key Messages and Communications
       </h3>
+      <section className="mb-6">
+        <h3 className="font-semibold text-[#001033] mb-2">Objectives</h3>
+        <ul className="text-sm list-disc pl-6 space-y-1">
+          <li>To strategize on how to engage your potential organization donors using strong key messages</li>
+          <li>To identify needed materials and strategies to engage and nurture donors</li>
+        </ul>
+        <p className="text-sm text-gray-600 mt-3">
+          Identify needed Fundraising materials and strategies that correspond to the different potential donors.
+        </p>
+      </section>
 
       {/* One table per section */}
       {SECTIONS.map(section => (

@@ -32,7 +32,7 @@ const ProgramBlock = ({ program, index }) => {
     <div className="mb-6 rounded-xl border overflow-hidden">
 
       {/* Program header */}
-      <div className="bg-[#001033] px-4 py-2.5 flex items-center gap-2">
+      <div className="bg-black px-4 py-2.5 flex items-center gap-2">
         <span className="text-white text-[10px] font-bold uppercase tracking-widest opacity-60">
           Program {index + 1}
         </span>
@@ -128,7 +128,7 @@ const GrandTotalsRow = ({ totals }) => {
 
   return (
     <div className="rounded-xl border overflow-hidden mt-2">
-      <div className="bg-black px-4 py-2">
+      <div className="bg-[#001033] px-4 py-2">
         <span className="text-white text-[10px] font-bold uppercase tracking-widest">
           Grand Total — All Programs
         </span>
@@ -217,6 +217,16 @@ const Tool6OverviewSection = ({ programs, totals, fundingNotes }) => {
       <h3 className="font-semibold text-lg mb-4 border-b pb-2">
         Tool 6 — Fundraising Action Plan
       </h3>
+      <section className="mb-6">
+        <h3 className="font-semibold text-[#001033] mb-2">Objectives</h3>
+        <ul className="text-sm list-disc pl-6 space-y-1">
+          <li>To develop a strategic, realistic, and organized Fundraising Action Plan for your Organization</li>
+          <li>To practice Fundraising planning skills</li>
+        </ul>
+        <p className="text-sm text-gray-600 mt-3">
+          Identify fund sources and corresponding strategies that can be pursued in the period of five (5) years.<br/> Briefly identify the specific objectives of the activities (amount to be raised, stakeholders to be involved).
+        </p>
+      </section>
 
       {/* One block per program */}
       {programs.map((program, i) => (

@@ -23,7 +23,7 @@ export const HeatFilter = ({ filterHeat, setFilterHeat }) => {
             onClick={() => setFilterHeat(active ? null : h)}
             className={`px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer border-[1.5px] transition-colors ${
               active
-                ? `${hc.filterBg} ${hc.filterBorder} ${hc.filterText}`
+                ? `${hc.filterBg} ${hc.filterBorderCs} ${hc.filterText}`
                 : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
             }`}
           >

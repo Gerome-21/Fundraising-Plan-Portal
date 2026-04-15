@@ -120,10 +120,10 @@ export const DonorModal = ({ donor, defaultLevel, defaultHeat, saving, onSave, o
           </div>
 
           <div className={`px-3.5 py-2.5 ${hc.bg} border-[1.5px] ${hc.filterBorder} rounded-lg flex items-center gap-2.5`}>
-            <div className={`w-2.5 h-2.5 rounded-full ${hc.dot} flex-shrink-0`} />
+            <div className={`w-2.5 h-2.5 rounded-full ${hc.dot} flex-shrink-0 animate-pulse`} />
             <div>
-              <p className={`m-0 text-xs font-bold ${hc.text}`}>Auto-classified: {form.heat}</p>
-              <p className={`m-0 text-[11px] ${hc.text} opacity-80`}>{hc.sub} — based on C's checked</p>
+              <p className={`m-0 text-xs font-bold ${hc.textCs}`}>Auto-classified: {form.heat}</p>
+              <p className={`m-0 text-[11px] ${hc.textCs} opacity-80`}>{hc.sub} — based on C's checked</p>
             </div>
           </div>
 

@@ -28,7 +28,7 @@ export const PyramidGrid = ({ donors, filterHeat, onEditDonor, onDeleteDonor, on
           const hc = HEAT_CONFIG[h];
           return (
             <div key={h} className="text-center">
-              <div className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 ${hc.bg} border-[1.5px] ${hc.filterBorder} rounded-full text-xs font-bold ${hc.text}`}>
+              <div className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 ${hc.bgCs} border-[1.5px] ${hc.filterBorderCs} rounded-full text-xs font-bold ${hc.textCs}`}>
                 <div className={`w-[7px] h-[7px] rounded-full ${hc.dot}`} />
                 {hc.label}
                 <span className="font-normal opacity-70">{hc.sub}</span>

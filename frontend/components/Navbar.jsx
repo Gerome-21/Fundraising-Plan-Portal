@@ -34,7 +34,7 @@ const Navbar = () => {
       </Link>
 
       <div className="hidden lg:flex items-center space-x-8">
-        <Link 
+        {/* <Link 
           to="/form"
           className="text-md text-[#001033] hover:text-green-600 transition-colors font-medium relative group"
         >
@@ -54,7 +54,7 @@ const Navbar = () => {
         >
           Report
           <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 group-hover:w-full transition-all duration-300"></span>
-        </Link>
+        </Link> */}
         
         <div className="flex items-center gap-4 pl-4 border-l border-gray-200">
           {user && (

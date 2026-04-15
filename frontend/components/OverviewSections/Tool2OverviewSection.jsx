@@ -25,6 +25,13 @@ const Tool2OverviewSection = ({
       <h3 className="font-semibold text-lg mb-4 border-b pb-2">
         Tool 2 — Program Needs List
       </h3>
+      <section className="mb-6 ">
+        <h3 className="font-semibold mb-2">Objectives</h3>
+        <ul className="text-sm list-disc pl-6 mb-6 space-y-1">
+          <li>To determine the funds needed by the program</li>
+          <li>To identify the difference between the program requirements and the committed funds</li>
+        </ul>
+      </section>
 
       <div className="overflow-x-auto rounded-lg border text-xs">
         <table className="min-w-full">

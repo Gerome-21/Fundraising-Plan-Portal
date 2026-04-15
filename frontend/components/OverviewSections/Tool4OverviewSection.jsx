@@ -59,7 +59,7 @@ const PyramidOverview = ({ donorMatrix }) => (
         const hc = HEAT_CONFIG[heat];
         return (
           <div key={heat} className="text-center">
-            <span className={`inline-flex items-center gap-1 px-3 py-1 ${hc.bg} border ${hc.filterBorder} rounded-full text-[10px] font-bold ${hc.text}`}>
+            <span className={`inline-flex items-center gap-1 px-3 py-1 ${hc.bgCs} border ${hc.filterBorderCs} rounded-full text-[10px] font-bold ${hc.textCs}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${hc.dot}`} />
               {hc.label}
               <span className="font-normal opacity-60 text-[9px]">{hc.sub}</span>
@@ -168,7 +168,7 @@ const DonorRoster = ({ donorMatrix }) => {
                     <tr key={d.id} className={`border-t ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                       <td className="px-3 py-2 font-medium text-gray-800">{d.name}</td>
                       <td className="px-3 py-2 text-center">
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${hc.bg} ${hc.text} border ${hc.filterBorder}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${hc.bgCs} ${hc.textCs} border ${hc.filterBorderCs}`}>
                           {d.heat}
                         </span>
                       </td>
@@ -214,14 +214,22 @@ const Tool4OverviewSection = ({ donors, donorMatrix, stats }) => {
   return (
     <section className="mb-10">
       <h3 className="font-semibold text-lg mb-4 border-b pb-2">Tool 4 — Potential Donor Pyramid</h3>
+      <section className="mb-6">
+        <h3 className="font-semibold mb-2">Objectives</h3>
+        <p className="text-sm">
+          Identify the different donors (both current and potential) for your Organization. 
+          Classify them into HIGH, MEDIUM, and LOW-LEVEL givers, then HOT, WARM, and COLD 
+          according to the three Cs – Connection, Capability, and Concern. Plot them on the triangle below.
+        </p>
+      </section>
 
       {/* Stats */}
       <div className="grid grid-cols-7 gap-2 mb-6">
-        <StatPill label="Total"  value={stats.total}         bg="bg-green-50"    text="text-[#001033]" />
-        <StatPill label="HOT"    value={stats.byHeat.HOT}    bg="bg-emerald-100" text="text-emerald-900" />
-        <StatPill label="WARM"   value={stats.byHeat.WARM}   bg="bg-green-100"   text="text-green-800" />
-        <StatPill label="COLD"   value={stats.byHeat.COLD}   bg="bg-green-50"    text="text-green-600" />
-        <StatPill label="HIGH"   value={stats.byLevel.HIGH}  bg="bg-emerald-100" text="text-emerald-900" />
+        <StatPill label="Total"  value={stats.total}         bg="bg-emerald-800"    text="text-white" />
+        <StatPill label="HOT"    value={stats.byHeat.HOT}    bg="bg-gray-200" text="text-black" />
+        <StatPill label="WARM"   value={stats.byHeat.WARM}   bg="bg-gray-100"   text="text-black" />
+        <StatPill label="COLD"   value={stats.byHeat.COLD}   bg="bg-gray-50"    text="text-black" />
+        <StatPill label="HIGH"   value={stats.byLevel.HIGH}  bg="bg-green-200" text="text-emerald-900" />
         <StatPill label="MEDIUM" value={stats.byLevel.MEDIUM} bg="bg-green-100"  text="text-green-700" />
         <StatPill label="LOW"    value={stats.byLevel.LOW}   bg="bg-green-50"    text="text-green-500" />
       </div>

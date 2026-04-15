@@ -25,6 +25,13 @@ const Tool3OverviewSection = ({ rows, totals }) => {
       <h3 className="font-semibold text-lg mb-4 border-b pb-2">
         Tool 3 — Gift Range Chart
       </h3>
+      <section className="mb-6 ">
+        <h3 className="font-semibold mb-2">Objectives</h3>
+        <ul className="text-sm list-disc pl-6 mb-6 space-y-1">
+          <li>To have an estimated number of donors needed to strategically meet the organization’s funding needs</li>
+          <li>To determine gift levels, the number of gifts needed per gift level, and the number of prospects the organization should seek as it implements its Fundraising activities</li>
+        </ul>
+      </section>
 
       <div className="overflow-x-auto rounded-lg border text-xs">
         <table className="min-w-full">

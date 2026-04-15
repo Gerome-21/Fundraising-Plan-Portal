@@ -16,7 +16,7 @@ const PolicyItem = ({ label, value }) => {
       {isEmpty ? (
         <p className="text-sm text-gray-400 italic">No response provided.</p>
       ) : (
-        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{value}</p>
+        <p className="text-sm text-black leading-relaxed whitespace-pre-wrap">{value}</p>
       )}
     </div>
   );
@@ -42,6 +42,12 @@ const Tool7OverviewSection = ({ formData, fields }) => {
       <h3 className="font-semibold text-lg mb-4 border-b border-gray-200 pb-2">
         Tool 7 — Fundraising Policies
       </h3>
+      <section className="mb-6">
+        <h3 className="font-semibold text-[#001033] mb-2">Objective</h3>
+        <ul className="text-sm list-disc pl-6 space-y-1">
+          <li>To create clear and responsible fundraising policies for your organization</li>
+        </ul>
+      </section>
 
       <div className="space-y-3">
         {fields.map(({ key, label }) => (
