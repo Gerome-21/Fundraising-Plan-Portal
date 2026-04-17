@@ -33,7 +33,7 @@ const Tool3OverviewSection = ({ rows, totals }) => {
         </ul>
       </section>
 
-      <div className="rounded-lg border text-xs">
+      <div className="border text-xs">
         <table className="min-w-full">
           <thead className="bg-black text-white">
             <tr>

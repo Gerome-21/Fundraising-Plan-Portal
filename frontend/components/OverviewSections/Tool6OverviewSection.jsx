@@ -29,7 +29,7 @@ const ProgramBlock = ({ program, index }) => {
   }));
 
   return (
-    <div className="mb-6 rounded-xl border">
+    <div className="mb-6 border">
 
       {/* Program header */}
       <div className="bg-black px-4 py-2.5 flex items-center gap-2">
@@ -127,7 +127,7 @@ const GrandTotalsRow = ({ totals }) => {
   if (!hasAny) return null;
 
   return (
-    <div className="rounded-xl border mt-2">
+    <div className="border mt-2">
       <div className="bg-[#001033] px-4 py-2">
         <span className="text-white text-[10px] font-bold uppercase tracking-widest">
           Grand Total — All Programs
@@ -183,7 +183,7 @@ const FundingNotesBlock = ({ notes }) => {
   if (!notes || notes.length === 0) return null;
 
   return (
-    <div className="mt-4 border border-gray-200 rounded-xl p-4 bg-gray-50 text-xs space-y-2.5">
+    <div className="mt-4 border border-gray-200 p-4 bg-gray-50 text-xs space-y-2.5">
       <p className="font-semibold text-gray-500 uppercase tracking-wide text-[10px]">
         Funding Prospects / Notes
       </p>

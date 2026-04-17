@@ -33,7 +33,7 @@ const Tool2OverviewSection = ({
         </ul>
       </section>
 
-      <div className="rounded-lg border text-xs">
+      <div className=" border text-xs">
         <table className="min-w-full">
           <thead>
             <tr className="bg-black text-white">

@@ -1,124 +1,158 @@
-import React, { useState, useEffect } from "react";
-import { FiArrowLeftCircle, FiArrowRightCircle } from "react-icons/fi";
+import React from "react";
 
-const PlanningTools = ({ steps, step, setStep, isCompactView }) => {
-
-  const toolsPerPage = 3;
-  const [page, setPage] = useState(0);
-  
-  useEffect(() => {
-    const newPage = Math.floor((step - 1) / toolsPerPage);
-    setPage(newPage);
-  }, [step]);
-
-  const startIndex = page * toolsPerPage;
-  const visibleTools = steps.slice(startIndex, startIndex + toolsPerPage);
-
-  const totalPages = Math.ceil(steps.length / toolsPerPage);
+const PlanningTools = ({ steps, step, setStep }) => {
+  const currentTool = steps.find((t) => t.number === step);
+  const firstColumn  = steps.slice(0, 4);
+  const secondColumn = steps.slice(4, 8);
 
   return (
-    <div className="h-full transition-all duration-500 ease-in-out">
-      <div 
-        className={`bg-white rounded-2xl px-6 pt-6 pb-2 shadow-lg sticky top-8 transition-all duration-500 ease-in-out overflow-hidden ${
-          isCompactView ? 'w-[120px]' : 'w-[280px]'
-        }`}
-        style={{
-          width: isCompactView ? '120px' : '280px'
-        }}
-      >
-        {/* Title with fade transition */}
-        <div className="transition-all duration-500 ease-in-out">
-          <h3 
-            className={`text-xl font-bold text-[#001033] mb-4 transition-all duration-500 ease-in-out whitespace-nowrap ${
-              isCompactView ? 'opacity-100 scale-100' : 'opacity-100 scale-100'
-            }`}
-          >
-            {isCompactView ? 'Tools' : 'Planning Tools'}
-          </h3>
-        </div>
+    <div className="sticky top-8 flex flex-col gap-0">
 
-        <div className="space-y-1 transition-all duration-500 ease-in-out">
-          {visibleTools.map((s, index) => (
-            <div key={s.number} className="transition-all duration-500 ease-in-out">
-              <div
-                onClick={() => setStep(s.number)}
-                className={`flex items-center gap-2 p-2 rounded-xl cursor-pointer transition-all duration-300
-                  ${step === s.number
-                    ? "bg-[#40F58E]/20 border-l-4 border-[#22864D]"
-                    : "bg-gray-50 border-l-4 border-gray-300 hover:bg-gray-100"}
-                `}
-              >
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300
-                    ${step === s.number
-                      ? "bg-[#22864D] text-white"
-                      : "bg-gray-300 text-gray-600"}
-                  `}
-                >
-                  <div className="relative group">
-                    <p className="transition-transform duration-300 group-hover:scale-110">{s.icon}</p>
-                    <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap z-50 pointer-events-none">
-                      {s.title}
-                    </div>
-                  </div>
-                </div>
+      {/* ── Single unified card ───────────────────────────────────── */}
+      <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
 
-                <div 
-                  className={`transition-all duration-500 ease-in-out overflow-hidden ${
-                    isCompactView ? 'opacity-100 w-6' : 'opacity-100 w-32'
-                  }`}
-                >
-                  {!isCompactView ? (
-                    <div className="transition-all duration-500">
-                      <p className="text-xs text-gray-500">Tool {s.number}</p>
-                      <p className="font-semibold text-gray-800 text-sm ">{s.title}</p>
-                    </div>
-                  ) : (
-                    <div className="relative group">
-                      <p className="text-xs text-gray-500 font-bold">{s.number}</p>
-                      <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap z-50 pointer-events-none">
-                        {s.title}
-                      </div>
-                    </div>
-                  )}
-                </div>
+        {/* ── Brand strip ───────────────────────────────────────── */}
+        <div className="bg-[#001033] px-4 pt-4 pb-5">
+
+          {/* Brand identity line */}
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[9px] font-bold tracking-[0.18em] uppercase text-[#40F58E]">
+              Planning Tools
+            </p>
+            {/* Step counter pill */}
+            <p className="text-xs font-bold text-[#40F58E] whitespace-nowrap px-3 py-1 border border-white/10 rounded-full">
+              {step}/{steps.length}
+            </p>
+          </div>
+
+          {/* Divider */}
+          <div className="h-px bg-white/8 mb-4" />
+
+          {/* Current tool display */}
+          {currentTool && (
+            <div className="flex items-start gap-3">
+              {/* Icon bubble */}
+              <div className="shrink-0 w-9 h-9 rounded-xl bg-[#40F58E]/15 border border-[#40F58E]/25 flex items-center justify-center text-[#40F58E] text-base">
+                {currentTool.icon}
               </div>
 
-              {index < visibleTools.length - 1 && (
-                <div 
-                  className={`transition-all duration-500 ease-in-out ${
-                    isCompactView ? 'h-3' : 'h-6'
-                  } w-0.5 ml-5 bg-gray-300`}
-                />
-              )}
+              {/* Label + Title */}
+              <div className="flex flex-col justify-center min-w-0">
+                <p className="text-[9px] font-bold tracking-widest uppercase text-white/35 mb-0.5">
+                  Tool {currentTool.number}
+                </p>
+                <p className="text-sm font-semibold text-white leading-snug">
+                  {currentTool.title}
+                </p>
+              </div>
             </div>
-          ))}
+          )}
         </div>
 
-        {/* Pagination */}
-      {steps.length > toolsPerPage && (
-        <div
-          className={`flex justify-center items-center gap-2 mt-4 transition-all duration-500 ease-in-out ${
-            isCompactView ? "scale-90" : "scale-100"
-          }`}
-        >
-          <button
-            onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-            disabled={page === 0}
-            className="px-2 py-1 text-[#22864D] rounded disabled:text-gray-400 disabled:opacity-50 cursor-pointer transition-all duration-300 hover:scale-110"
-          >
-            <FiArrowLeftCircle className="w-8 h-8" />
-          </button>
+        {/* ── Connector notch — visually joins header to grid ───── */}
+        <div className="h-px bg-gray-100" />
 
-          <button
-            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
-            disabled={page === totalPages - 1}
-            className="px-2 py-1 text-[#22864D] rounded disabled:text-gray-400 disabled:opacity-50 cursor-pointer transition-all duration-300 hover:scale-110"
-          >
-            <FiArrowRightCircle className="w-8 h-8" />
-          </button>
+        {/* ── Step grid ─────────────────────────────────────────── */}
+        <div className="p-3">
+          <p className="text-[9px] font-semibold text-gray-300 uppercase tracking-[0.15em] mb-2.5 px-1">
+            Steps
+          </p>
+
+          <div className="grid grid-cols-2 gap-1.5">
+            {/* Column 1 */}
+            <div className="flex flex-col gap-2">
+              {firstColumn.map((tool) => {
+                const isActive = step === tool.number;
+                const isPast   = step > tool.number;
+                return (
+                  <button
+                    key={tool.number}
+                    onClick={() => setStep(tool.number)}
+                    title={tool.title}
+                    className={`
+                      w-full flex items-center justify-between
+                      px-2.5 py-2 rounded-xl transition-all duration-200
+                      ${isActive
+                        ? "bg-[#22864D] shadow-md shadow-[#22864D]/25"
+                        : isPast
+                          ? "bg-gray-50 hover:bg-gray-100"
+                          : "hover:bg-gray-100"
+                      }
+                    `}
+                  >
+                    <div className={`
+                      w-6 h-6 rounded-lg flex items-center justify-center
+                      text-[11px] font-bold transition-all duration-200
+                      ${isActive
+                        ? "bg-white/20 text-white"
+                        : isPast
+                          ? "bg-[#22864D]/12 text-[#22864D]"
+                          : "bg-gray-100 text-gray-400"
+                      }
+                    `}>
+                      {tool.number}
+                    </div>
+
+                    {/* Active pulse dot */}
+                    {isActive && (
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#40F58E]" />
+                    )}
+
+                    {/* Past step subtle line */}
+                    {isPast && !isActive && (
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#22864D]/30" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Column 2 */}
+            <div className="flex flex-col gap-2">
+              {secondColumn.map((tool) => {
+                const isActive = step === tool.number;
+                const isPast   = step > tool.number;
+                return (
+                  <button
+                    key={tool.number}
+                    onClick={() => setStep(tool.number)}
+                    title={tool.title}
+                    className={`
+                      w-full flex items-center justify-between
+                      px-2.5 py-2 rounded-xl transition-all duration-200
+                      ${isActive
+                        ? "bg-[#22864D] shadow-md shadow-[#22864D]/25"
+                        : isPast
+                          ? "bg-gray-50 hover:bg-gray-100"
+                          : "hover:bg-gray-100"
+                      }
+                    `}
+                  >
+                    <div className={`
+                      w-6 h-6 rounded-lg flex items-center justify-center
+                      text-[11px] font-bold transition-all duration-200
+                      ${isActive
+                        ? "bg-white/20 text-white"
+                        : isPast
+                          ? "bg-[#22864D]/12 text-[#22864D]"
+                          : "bg-gray-100 text-gray-400"
+                      }
+                    `}>
+                      {tool.number}
+                    </div>
+
+                    {isActive && (
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#40F58E]" />
+                    )}
+                    {isPast && !isActive && (
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#22864D]/30" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
-      )}
       </div>
     </div>
   );

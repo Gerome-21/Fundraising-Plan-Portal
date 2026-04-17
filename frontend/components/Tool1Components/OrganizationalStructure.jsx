@@ -74,8 +74,8 @@ const OrganizationalStructure = ({
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
-        panOnDrag={true}
-        zoomOnScroll={true}
+        panOnDrag={false}
+        zoomOnScroll={false}
       >
         <MiniMap
           nodeStrokeWidth={2}

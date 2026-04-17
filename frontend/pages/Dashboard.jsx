@@ -1,8 +1,16 @@
 import React, { useState } from "react";
-import { FiClipboard, FiFileText, FiGift, FiHeart, FiLayers, FiList, FiMessageSquare, FiTriangle } from "react-icons/fi";
+import {
+  FiClipboard,
+  FiFileText,
+  FiGift,
+  FiHeart,
+  FiList,
+  FiMessageSquare,
+  FiTriangle,
+} from "react-icons/fi";
+import { MdInsights } from "react-icons/md";
 import PlanningContent from "../components/home/PlanningContent";
 import PlanningTools from "../components/home/PlanningTools";
-import { MdInsights } from "react-icons/md";
 
 const Dashboard = () => {
   const [step, setStep] = useState(1);
@@ -12,42 +20,24 @@ const Dashboard = () => {
     { number: 2, title: "Program Needs List", icon: <FiList /> },
     { number: 3, title: "Gift Range Chart", icon: <FiGift /> },
     { number: 4, title: "Potential Donor Pyramid", icon: <FiTriangle /> },
-    { number: 5, title: "Key Messages and Communications", icon: <FiMessageSquare /> },
-    { number: 6, title: "Fundraising Action Plan", icon: <FiClipboard /> },
-    { number: 7, title: "Fundraising Policies Sentence Completion", icon: <FiFileText /> },
-    { number: 8, title: "Plan Summary and Insights", icon: <MdInsights /> },
+    { number: 5, title: "Key Messages", icon: <FiMessageSquare /> },
+    { number: 6, title: "Action Plan", icon: <FiClipboard /> },
+    { number: 7, title: "Policies", icon: <FiFileText /> },
+    { number: 8, title: "Plan Summary", icon: <MdInsights /> },
   ];
-
-  // Define which tools should trigger compact view
-  const compactViewTools = [2, 4, 6, 8];
-  const isCompactView = compactViewTools.includes(step);
 
   return (
     <div className="p-2">
-      <div 
-        className={`grid transition-all duration-500 ease-in-out gap-4 ${
-          isCompactView ? 'grid-cols-[120px_1fr]' : 'grid-cols-[280px_1fr]'
-        }`}
-        style={{
-          gridTemplateColumns: isCompactView ? '120px 1fr' : '280px 1fr'
-        }}
-      >
-        {/* LEFT SIDE - Planning Tools */}
-        <div className="transition-all duration-500 ease-in-out">
-          <PlanningTools
-            steps={steps}
-            step={step}
-            setStep={setStep}
-            isCompactView={isCompactView}
-          />
+      {/* Fixed two‑column layout: sidebar (300px) + content */}
+      <div className="grid grid-cols-[160px_1fr] gap-4">
+        {/* Left: Tools */}
+        <div>
+          <PlanningTools steps={steps} step={step} setStep={setStep} />
         </div>
 
-        {/* RIGHT SIDE - Planning Content */}
-        <div className="transition-all duration-500 ease-in-out">
-          <PlanningContent
-            step={step}
-            setStep={setStep}
-          />
+        {/* Right: Tool content */}
+        <div>
+          <PlanningContent step={step} setStep={setStep} />
         </div>
       </div>
     </div>
