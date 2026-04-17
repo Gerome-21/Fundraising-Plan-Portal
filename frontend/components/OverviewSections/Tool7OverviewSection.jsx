@@ -28,7 +28,7 @@ const Tool7OverviewSection = ({ formData, fields }) => {
 
   if (!hasAnyContent) {
     return (
-      <section className="mb-10">
+      <section className="mb-14">
         <h3 className="font-semibold text-lg mb-4 border-b border-gray-200 pb-2">
           Tool 7 — Fundraising Policies
         </h3>
@@ -38,7 +38,7 @@ const Tool7OverviewSection = ({ formData, fields }) => {
   }
 
   return (
-    <section className="mb-10">
+    <section className="mb-14">
       <h3 className="font-semibold text-lg mb-4 border-b border-gray-200 pb-2">
         Tool 7 — Fundraising Policies
       </h3>

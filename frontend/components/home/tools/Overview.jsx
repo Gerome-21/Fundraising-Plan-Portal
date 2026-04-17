@@ -11,7 +11,7 @@ import Tool7OverviewSection from '../../OverviewSections/Tool7OverviewSection';
 import { FiPrinter, FiDownload, FiLoader } from 'react-icons/fi';
 import { useReactToPrint } from 'react-to-print';
 import { useUser } from '../../../context/UserContext';
-import { usePdfExport } from '../../../hooks/usePdfExport';
+import { usePdfExportV2 } from '../../../hooks/usePdfExportV2';
 
 const Overview = () => {
   const { isLoading, tool1, tool2, tool3, tool4, tool5, tool6, tool7 } = useOverviewData();
@@ -40,11 +40,12 @@ const Overview = () => {
   });
 
   // ── PDF download ────────────────────────────────────────────────────
-  const { downloadPdf, isExporting } = usePdfExport();
+  const { downloadPdf, isExporting } = usePdfExportV2();
 
   const handleDownloadPdf = useCallback(() => {
     downloadPdf({
       contentRef: printRef,
+      documentTitle: `Fundraising Plan Report - ${user?.organization_name || '-'}`,
       flowRef,
       onBeforeCapture: (snapshot) => {
         setFlowSnapshot(snapshot);
@@ -129,8 +130,8 @@ const Overview = () => {
           <h2 className="font-semibold text-xl mb-2">Fundraising Plan Report</h2>
           <p className="text-sm text-gray-700 leading-relaxed max-w-2xl mx-auto">
             This report summarizes the organization's fundraising plan based on the completed
-            planning tools. It highlights key strategies, financial projections, and
-            organizational insights to support effective decision-making and implementation.
+            planning tools. It provides a structured and visual overview of the data,
+            making it easier to understand, review, and communicate the plan effectively.
           </p>
         </div>
 

@@ -183,7 +183,7 @@ const SummaryTable = ({ summary, grandTotal }) => (
 const Tool5OverviewSection = ({ rawData, summary, grandTotal }) => {
   if (!rawData || grandTotal === 0) {
     return (
-      <section className="mb-10">
+      <section className="mb-14">
         <h3 className="font-semibold text-lg mb-4 border-b pb-2">
           Tool 5 — Key Messages and Communications
         </h3>
@@ -193,7 +193,7 @@ const Tool5OverviewSection = ({ rawData, summary, grandTotal }) => {
   }
 
   return (
-    <section className="mb-10">
+    <section className="mb-14">
       <h3 className="font-semibold text-lg mb-4 border-b pb-2">
         Tool 5 — Key Messages and Communications
       </h3>

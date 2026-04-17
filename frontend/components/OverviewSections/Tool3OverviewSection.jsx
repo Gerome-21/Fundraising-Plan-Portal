@@ -11,7 +11,7 @@ const fmtCurrency = (num) => `₱ ${fmt(num)}`;
 const Tool3OverviewSection = ({ rows, totals }) => {
   if (!rows || rows.length === 0) {
     return (
-      <section className="mb-10">
+      <section className="mb-14">
         <h3 className="font-semibold text-lg mb-4 border-b pb-2">
           Tool 3 — Gift Range Chart
         </h3>
@@ -21,7 +21,7 @@ const Tool3OverviewSection = ({ rows, totals }) => {
   }
 
   return (
-    <section className="mb-10">
+    <section className="mb-14">
       <h3 className="font-semibold text-lg mb-4 border-b pb-2">
         Tool 3 — Gift Range Chart
       </h3>
@@ -33,7 +33,7 @@ const Tool3OverviewSection = ({ rows, totals }) => {
         </ul>
       </section>
 
-      <div className="overflow-x-auto rounded-lg border text-xs">
+      <div className="rounded-lg border text-xs">
         <table className="min-w-full">
           <thead className="bg-black text-white">
             <tr>

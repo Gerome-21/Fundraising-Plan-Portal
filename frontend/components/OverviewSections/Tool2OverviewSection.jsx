@@ -21,7 +21,7 @@ const Tool2OverviewSection = ({
   const hasAnyComments = requirementsWithComments.length > 0 || committedWithComments.length > 0;
 
   return (
-    <section className="mb-10">
+    <section className="mb-14">
       <h3 className="font-semibold text-lg mb-4 border-b pb-2">
         Tool 2 — Program Needs List
       </h3>
@@ -33,7 +33,7 @@ const Tool2OverviewSection = ({
         </ul>
       </section>
 
-      <div className="overflow-x-auto rounded-lg border text-xs">
+      <div className="rounded-lg border text-xs">
         <table className="min-w-full">
           <thead>
             <tr className="bg-black text-white">

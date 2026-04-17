@@ -204,7 +204,7 @@ const StatPill = ({ label, value, bg, text }) => (
 const Tool4OverviewSection = ({ donors, donorMatrix, stats }) => {
   if (!donors || donors.length === 0) {
     return (
-      <section className="mb-10">
+      <section className="mb-14">
         <h3 className="font-semibold text-lg mb-4 border-b pb-2">Tool 4 — Potential Donor Pyramid</h3>
         <p className="text-sm text-gray-400 italic">No donors added yet.</p>
       </section>
@@ -212,7 +212,7 @@ const Tool4OverviewSection = ({ donors, donorMatrix, stats }) => {
   }
 
   return (
-    <section className="mb-10">
+    <section className="mb-14">
       <h3 className="font-semibold text-lg mb-4 border-b pb-2">Tool 4 — Potential Donor Pyramid</h3>
       <section className="mb-6">
         <h3 className="font-semibold mb-2">Objectives</h3>

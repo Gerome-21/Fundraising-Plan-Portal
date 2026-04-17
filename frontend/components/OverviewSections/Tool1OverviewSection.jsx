@@ -94,7 +94,7 @@ const Tool1OverviewSection = ({
   };
 
   return (
-    <section className="mb-10">
+    <section className="mb-14">
       <h3 className="font-semibold text-lg mb-4 border-b pb-2">
         Tool 1 — Self Assessment
       </h3>

@@ -29,7 +29,7 @@ const ProgramBlock = ({ program, index }) => {
   }));
 
   return (
-    <div className="mb-6 rounded-xl border overflow-hidden">
+    <div className="mb-6 rounded-xl border">
 
       {/* Program header */}
       <div className="bg-black px-4 py-2.5 flex items-center gap-2">
@@ -127,7 +127,7 @@ const GrandTotalsRow = ({ totals }) => {
   if (!hasAny) return null;
 
   return (
-    <div className="rounded-xl border overflow-hidden mt-2">
+    <div className="rounded-xl border mt-2">
       <div className="bg-[#001033] px-4 py-2">
         <span className="text-white text-[10px] font-bold uppercase tracking-widest">
           Grand Total — All Programs
@@ -203,7 +203,7 @@ const FundingNotesBlock = ({ notes }) => {
 const Tool6OverviewSection = ({ programs, totals, fundingNotes }) => {
   if (!programs || programs.length === 0) {
     return (
-      <section className="mb-10">
+      <section className="mb-14">
         <h3 className="font-semibold text-lg mb-4 border-b pb-2">
           Tool 6 — Fundraising Action Plan
         </h3>
@@ -213,7 +213,7 @@ const Tool6OverviewSection = ({ programs, totals, fundingNotes }) => {
   }
 
   return (
-    <section className="mb-10">
+    <section className="mb-14">
       <h3 className="font-semibold text-lg mb-4 border-b pb-2">
         Tool 6 — Fundraising Action Plan
       </h3>
