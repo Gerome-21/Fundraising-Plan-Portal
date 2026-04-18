@@ -25,13 +25,16 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   const login = async (organization_name, user_name) => {
+    const org = organization_name.trim();
+    const name = user_name.trim();
+
     try {
       // First, try to find existing user
       const { data: existingUser, error: findError } = await supabase
         .from('users')
         .select('*')
-        .eq('organization_name', organization_name)
-        .eq('user_name', user_name)
+        .eq('organization_name', org)
+        .eq('user_name', name)
         .maybeSingle();
 
       if (findError && findError.code !== 'PGRST116') {
@@ -51,8 +54,8 @@ export const UserProvider = ({ children }) => {
         const { data: newUser, error: insertError } = await supabase
           .from('users')
           .insert([{
-            organization_name: organization_name,
-            user_name: user_name,
+            organization_name: org,
+            user_name: name,
             created_at: new Date().toISOString()
           }])
           .select()

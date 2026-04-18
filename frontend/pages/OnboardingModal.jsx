@@ -21,7 +21,13 @@ const OnboardingModal = ({ isOpen, onComplete, onSkip }) => {
     }
 
     setLoading(true);
-    await onComplete(formData);
+    const cleanedData = {
+      organization_name: formData.organization_name.trim(),
+      user_name: formData.user_name.trim()
+    };
+
+    await onComplete(cleanedData);
+
     setLoading(false);
   };
 
