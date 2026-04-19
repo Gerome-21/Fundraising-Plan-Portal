@@ -78,13 +78,13 @@ const ProgramBlock = ({ program, index }) => {
 
                   {yearData.map((yd, yi) => (
                     <React.Fragment key={yi}>
-                      <td className="px-3 py-2 text-right border-l border-gray-100 text-gray-600">
+                      <td className="px-3 py-2 text-[10px] text-right border-l border-gray-100 text-gray-600">
                         {yd.expenses > 0
                           ? <span>{fmt(yd.expenses)}</span>
                           : <span className="text-gray-200">—</span>
                         }
                       </td>
-                      <td className="px-3 py-2 text-right text-gray-600">
+                      <td className="px-3 py-2 text-[10px] text-right text-gray-600">
                         {yd.revenue > 0
                           ? <span className="text-[#22864D] font-medium">{fmt(yd.revenue)}</span>
                           : <span className="text-gray-200">—</span>
@@ -105,10 +105,10 @@ const ProgramBlock = ({ program, index }) => {
               </td>
               {programTotals.map((pt, yi) => (
                 <React.Fragment key={yi}>
-                  <td className="px-3 py-2 text-right font-bold text-gray-700 border-l border-gray-200">
+                  <td className="px-3 py-2 text-[10px] text-right font-bold text-gray-700 border-l border-gray-200">
                     {pt.expenses > 0 ? fmtTotal(pt.expenses) : <span className="text-gray-300 font-normal">—</span>}
                   </td>
-                  <td className="px-3 py-2 text-right font-bold text-[#22864D]">
+                  <td className="px-3 py-2 text-[10px] text-right font-bold text-[#22864D]">
                     {pt.revenue > 0 ? fmtTotal(pt.revenue) : <span className="text-gray-300 font-normal">—</span>}
                   </td>
                 </React.Fragment>
@@ -151,18 +151,18 @@ const GrandTotalsRow = ({ totals }) => {
         </thead>
         <tbody>
           <tr className="bg-white">
-            <td className="px-4 py-2.5 font-bold text-gray-700 uppercase tracking-wide text-[10px]">
+            <td className="px-4 py-2.5 font-bold text-gray-700 uppercase tracking-wide text-xs">
               TOTAL
             </td>
             {ACTION_YEARS.map((_, yi) => (
               <React.Fragment key={yi}>
-                <td className="px-3 py-2.5 text-right font-bold text-gray-800 border-l border-gray-100">
+                <td className="px-3 py-2.5 text-[10px] text-right font-bold text-gray-800 border-l border-gray-100">
                   {totals.expenses[yi] > 0
                     ? fmtTotal(totals.expenses[yi])
                     : <span className="text-gray-300 font-normal">—</span>
                   }
                 </td>
-                <td className="px-3 py-2.5 text-right font-bold text-[#22864D]">
+                <td className="px-3 py-2.5 text-[10px] text-right font-bold text-[#22864D]">
                   {totals.revenue[yi] > 0
                     ? fmtTotal(totals.revenue[yi])
                     : <span className="text-gray-300 font-normal">—</span>

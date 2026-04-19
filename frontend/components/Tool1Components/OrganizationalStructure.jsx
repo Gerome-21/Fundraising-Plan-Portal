@@ -55,6 +55,11 @@ const OrganizationalStructure = ({
     setShowBuilder(true);
   };
 
+  const handleSwitchToImage = async (e) => {
+    await handleUploadChart(e);
+    await handleSaveChartData({ nodes: [], edges: [] });
+  };
+
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
   };
@@ -123,7 +128,7 @@ const OrganizationalStructure = ({
       </p>
 
       {/* Action Buttons */}
-      <div className="flex gap-3 mb-4">
+     <div className="flex gap-3 mb-4">
         {hasInteractiveChart ? (
           <>
             <button
@@ -133,10 +138,22 @@ const OrganizationalStructure = ({
               <FiEdit2 className="w-4 h-4" />
               Edit Interactive Chart
             </button>
+            <label className="cursor-pointer">
+              <span className="flex items-center gap-2 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-all">
+                <FiImage className="w-4 h-4" />
+                Switch to Image
+              </span>
+              <input
+                type="file"
+                className="hidden"
+                accept=".png,.jpg,.jpeg"
+                onChange={handleSwitchToImage}
+                disabled={uploading}
+              />
+            </label>
           </>
         ) : (
-          <>
-          </>
+          <></>
         )}
       </div>
 
