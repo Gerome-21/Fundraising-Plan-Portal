@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import toast from 'react-hot-toast';
 
-const OnboardingModal = ({ isOpen, onComplete, onSkip }) => {
+const OnboardingModal = ({ isOpen, onComplete }) => {
   const [formData, setFormData] = useState({
     organization_name: '',
     user_name: ''
@@ -98,14 +98,6 @@ const OnboardingModal = ({ isOpen, onComplete, onSkip }) => {
             >
               {loading ? 'Starting...' : 'Start Planning'}
             </button>
-            
-            <button
-              type="button"
-              onClick={onSkip}
-              className="w-full text-gray-500 hover:text-gray-700 text-sm py-2 transition"
-            >
-              Skip for now
-            </button>
           </div>
 
           <p className="text-xs text-center text-gray-400 mt-4">
@@ -131,11 +123,6 @@ const PreliminaryForm = () => {
     }
   };
 
-  const handleSkip = () => {
-    setShowOnboarding(false);
-    navigate('/form');
-  };
-
   if (user && !showOnboarding) {
     navigate('/form');
     return null;
@@ -149,7 +136,6 @@ const PreliminaryForm = () => {
       <OnboardingModal
         isOpen={showOnboarding}
         onComplete={handleOnboardingComplete}
-        onSkip={handleSkip}
       />
     </div>
   );
